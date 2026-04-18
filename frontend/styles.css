@@ -1,0 +1,60 @@
+/* Custom styles on top of Tailwind */
+
+body {
+    /* Subtle background texture or gradient */
+    background: radial-gradient(circle at 50% -20%, #1e293b, #0f172a);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a; 
+}
+::-webkit-scrollbar-thumb {
+    background: #334155; 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569; 
+}
+
+/* Micro-animations */
+.summary-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.asset-row {
+    transition: background-color 0.2s ease;
+}
+.asset-row:hover {
+    background-color: rgba(30, 41, 59, 0.8);
+}
+
+.variation-positive {
+    color: #10b981;
+    background-color: rgba(16, 185, 129, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+.variation-negative {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* Modal Animations */
+#recommendation-modal.show {
+    display: flex;
+}
+#recommendation-modal.show #modal-content {
+    transform: scale(1);
+    opacity: 1;
+}

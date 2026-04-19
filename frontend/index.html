@@ -40,10 +40,15 @@
     </script>
 </head>
 <body class="bg-dark-bg text-dark-text font-sans antialiased min-h-screen">
+    <!-- Global Loading Spinner -->
+    <div id="global-loader" class="fixed inset-0 bg-dark-bg/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center transition-opacity duration-300">
+        <i class="fa-solid fa-circle-notch fa-spin text-brand-green text-5xl mb-4"></i>
+        <p class="text-lg font-medium text-white">Loading data...</p>
+    </div>
 
     <!-- Navbar -->
     <nav class="border-b border-dark-border bg-dark-card sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
                     <i class="fa-solid fa-wallet text-brand-green text-2xl mr-3"></i>
@@ -53,7 +58,7 @@
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <main class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

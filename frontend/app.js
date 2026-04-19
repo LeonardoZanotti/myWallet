@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tag: document.getElementById('add-tag').value
         };
         
+        showLoader();
         await fetch('/api/wallet/asset', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tag: document.getElementById('edit-tag').value
         };
         
+        showLoader();
         await fetch(`/api/wallet/asset/${ticker}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -63,13 +65,27 @@ function closeEditModal() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 }
 
+function showLoader() {
+    const l = document.getElementById('global-loader');
+    l.classList.remove('hidden');
+    l.classList.add('flex');
+}
+function hideLoader() {
+    const l = document.getElementById('global-loader');
+    l.classList.add('hidden');
+    l.classList.remove('flex');
+}
+
 async function fetchWallet() {
+    showLoader();
     try {
         const response = await fetch('/api/wallet');
         const data = await response.json();
         renderWallet(data.assets);
     } catch (error) {
         console.error("Error fetching wallet", error);
+    } finally {
+        hideLoader();
     }
 }
 
@@ -165,6 +181,7 @@ function renderWallet(assets) {
 
 async function deleteAsset(ticker) {
     if (confirm(`Remove ${ticker}?`)) {
+        showLoader();
         await fetch(`/api/wallet/asset/${ticker}`, { method: 'DELETE' });
         fetchWallet();
     }

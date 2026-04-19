@@ -51,10 +51,10 @@ body {
 }
 
 /* Modal Animations */
-#recommendation-modal.show {
+#recommendation-modal.show, #edit-modal.show {
     display: flex;
 }
-#recommendation-modal.show #modal-content {
+#recommendation-modal.show #modal-content, #edit-modal.show #edit-modal-content {
     transform: scale(1);
     opacity: 1;
 }

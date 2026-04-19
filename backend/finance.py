@@ -9,7 +9,7 @@ def get_current_prices(assets):
         return {}
         
     prices = {}
-    brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs']
+    brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs', 'BR ETF']
     
     try:
         for asset in assets:

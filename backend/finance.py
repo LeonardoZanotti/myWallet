@@ -32,3 +32,14 @@ def get_current_prices(assets):
     except Exception as e:
         print(f"Error fetching prices: {e}")
     return prices
+
+def get_exchange_rate():
+    """Fetches the current USD to BRL exchange rate."""
+    try:
+        ticker = yf.Ticker("USDBRL=X")
+        hist = ticker.history(period="1d")
+        if not hist.empty:
+            return float(hist['Close'].iloc[-1])
+    except Exception as e:
+        print(f"Error fetching exchange rate: {e}")
+    return 5.0  # Fallback exchange rate

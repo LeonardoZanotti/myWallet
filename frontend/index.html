@@ -61,40 +61,63 @@
     <main class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="summary-card bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-dark-muted text-sm font-medium mb-1">Total Patrimony</p>
+                        <p class="text-dark-muted text-sm font-medium mb-1">Total Patrimony (Unified)</p>
                         <h3 class="text-2xl font-bold" id="total-patrimony">R$ 0,00</h3>
                     </div>
                     <div class="p-3 bg-brand-blue/10 rounded-xl text-brand-blue">
                         <i class="fa-solid fa-building-columns"></i>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center text-sm">
-                    <span id="total-variation" class="text-brand-green font-medium flex items-center">
-                        <i class="fa-solid fa-arrow-trend-up mr-1"></i> 0.00%
-                    </span>
-                    <span class="text-dark-muted ml-2">overall return</span>
-                </div>
             </div>
             
             <div class="summary-card bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-dark-muted text-sm font-medium mb-1">Total Cost Basis</p>
-                        <h3 class="text-2xl font-bold" id="total-cost">R$ 0,00</h3>
+                        <p class="text-dark-muted text-sm font-medium mb-1">Total USD Assets</p>
+                        <h3 class="text-2xl font-bold" id="total-usd">$ 0.00</h3>
                     </div>
-                    <div class="p-3 bg-brand-green/10 rounded-xl text-brand-green">
-                        <i class="fa-solid fa-money-bill-wave"></i>
+                    <div class="p-3 bg-green-500/10 rounded-xl text-green-500">
+                        <i class="fa-solid fa-dollar-sign"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Smart Buy Calculator -->
-            <div class="col-span-1 lg:col-span-2 bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg bg-gradient-to-br from-dark-card to-[#1e293b]/80">
-                <h3 class="text-lg font-bold mb-4 flex items-center">
+            <div class="summary-card bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-dark-muted text-sm font-medium mb-1">Total BRL Assets</p>
+                        <h3 class="text-2xl font-bold" id="total-brl">R$ 0,00</h3>
+                    </div>
+                    <div class="p-3 bg-brand-green/10 rounded-xl text-brand-green">
+                        <i class="fa-solid fa-brazilian-real-sign"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-card bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-dark-muted text-sm font-medium mb-1">Unified Return</p>
+                        <h3 class="text-2xl font-bold" id="total-variation">
+                            <span class="text-brand-green font-medium flex items-center">
+                                <i class="fa-solid fa-arrow-trend-up mr-1"></i> 0.00%
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-purple-500/10 rounded-xl text-purple-500">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smart Buy Calculator -->
+        <div class="bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg bg-gradient-to-br from-dark-card to-[#1e293b]/80">
+            <h3 class="text-lg font-bold mb-4 flex items-center">
                     <i class="fa-solid fa-calculator text-brand-blue mr-2"></i> Smart Buy Calculator
                 </h3>
                 <div class="flex space-x-4 items-end">

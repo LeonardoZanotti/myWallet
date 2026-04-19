@@ -81,7 +81,7 @@ async function fetchWallet() {
     try {
         const response = await fetch('/api/wallet');
         const data = await response.json();
-        renderWallet(data.assets);
+        renderWallet(data.assets, data.exchange_rate);
     } catch (error) {
         console.error("Error fetching wallet", error);
     } finally {
@@ -89,9 +89,11 @@ async function fetchWallet() {
     }
 }
 
-function renderWallet(assets) {
-    let totalPatrimony = 0;
-    let totalCost = 0;
+function renderWallet(assets, exchangeRate = 5.0) {
+    let totalPatrimonyUnified = 0;
+    let totalCostUnified = 0;
+    let totalBrl = 0;
+    let totalUsd = 0;
     
     // Group by tag
     const groups = {};
@@ -99,24 +101,33 @@ function renderWallet(assets) {
         if (!groups[a.tag]) groups[a.tag] = [];
         groups[a.tag].push(a);
         
-        totalPatrimony += a.total_value;
-        totalCost += (a.quantity * a.average_price);
+        const rate = a.currency === 'USD' ? exchangeRate : 1.0;
+        
+        totalPatrimonyUnified += (a.total_value * rate);
+        totalCostUnified += (a.quantity * a.average_price * rate);
+        
+        if (a.currency === 'USD') {
+            totalUsd += a.total_value;
+        } else {
+            totalBrl += a.total_value;
+        }
     });
     
     // Update Summaries
-    document.getElementById('total-patrimony').innerText = formatCurrency(totalPatrimony);
-    document.getElementById('total-cost').innerText = formatCurrency(totalCost);
+    document.getElementById('total-patrimony').innerText = formatCurrency(totalPatrimonyUnified, 'BRL');
+    document.getElementById('total-brl').innerText = formatCurrency(totalBrl, 'BRL');
+    document.getElementById('total-usd').innerText = formatCurrency(totalUsd, 'USD');
     
-    const variation = totalCost > 0 ? ((totalPatrimony - totalCost) / totalCost) * 100 : 0;
+    const variation = totalCostUnified > 0 ? ((totalPatrimonyUnified - totalCostUnified) / totalCostUnified) * 100 : 0;
     const variationEl = document.getElementById('total-variation');
-    variationEl.innerHTML = `<i class="fa-solid fa-arrow-trend-${variation >= 0 ? 'up' : 'down'} mr-1"></i> ${variation.toFixed(2)}%`;
-    variationEl.className = variation >= 0 ? 'text-brand-green font-medium flex items-center' : 'text-brand-red font-medium flex items-center';
+    variationEl.innerHTML = `<span class="${variation >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium flex items-center"><i class="fa-solid fa-arrow-trend-${variation >= 0 ? 'up' : 'down'} mr-1"></i> ${variation.toFixed(2)}%</span>`;
 
     // Render Tables
     const container = document.getElementById('asset-groups-container');
     container.innerHTML = '';
     
     for (const [tag, groupAssets] of Object.entries(groups)) {
+        const cur = groupAssets[0]?.currency || 'BRL';
         let groupTotal = groupAssets.reduce((sum, a) => sum + a.total_value, 0);
         let groupCost = groupAssets.reduce((sum, a) => sum + (a.quantity * a.average_price), 0);
         let groupVar = groupCost > 0 ? ((groupTotal - groupCost) / groupCost) * 100 : 0;
@@ -126,7 +137,7 @@ function renderWallet(assets) {
             <div class="px-6 py-4 border-b border-dark-border flex justify-between items-center bg-dark-bg/30">
                 <h3 class="font-bold flex items-center"><i class="fa-solid fa-layer-group text-dark-muted mr-2"></i> ${tag}</h3>
                 <div class="text-sm">
-                    <span class="text-dark-muted mr-3">Value: <span class="text-white font-medium">${formatCurrency(groupTotal)}</span></span>
+                    <span class="text-dark-muted mr-3">Value: <span class="text-white font-medium">${formatCurrency(groupTotal, cur)}</span></span>
                     <span class="${groupVar >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium">${groupVar >= 0 ? '+' : ''}${groupVar.toFixed(2)}%</span>
                 </div>
             </div>
@@ -149,20 +160,20 @@ function renderWallet(assets) {
         
         groupAssets.forEach(a => {
             const isPositive = a.variation >= 0;
-            const priceText = a.current_price ? formatCurrency(a.current_price) : '<span class="text-dark-muted">N/A</span>';
+            const priceText = a.current_price ? formatCurrency(a.current_price, a.currency) : '<span class="text-dark-muted">N/A</span>';
             
             html += `
             <tr class="asset-row">
                 <td class="py-3 px-6 font-medium">${a.ticker}</td>
                 <td class="py-3 px-6">${a.quantity}</td>
-                <td class="py-3 px-6">${formatCurrency(a.average_price)}</td>
+                <td class="py-3 px-6">${formatCurrency(a.average_price, a.currency)}</td>
                 <td class="py-3 px-6">${priceText}</td>
                 <td class="py-3 px-6">
                     <span class="${isPositive ? 'variation-positive' : 'variation-negative'} inline-flex items-center text-xs font-semibold">
                         ${isPositive ? '+' : ''}${a.variation.toFixed(2)}%
                     </span>
                 </td>
-                <td class="py-3 px-6 font-medium">${formatCurrency(a.total_value)}</td>
+                <td class="py-3 px-6 font-medium">${formatCurrency(a.total_value, a.currency)}</td>
                 <td class="py-3 px-6 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.nota}</span></td>
                 <td class="py-3 px-6 text-right">
                     <button onclick="openEditModal('${a.ticker}', ${a.quantity}, ${a.average_price}, ${a.nota}, '${a.tag}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -218,9 +229,9 @@ async function calculateSmartBuy() {
                 <tr class="hover:bg-dark-border/20 transition-colors">
                     <td class="py-3 px-2 font-medium">${r.ticker}</td>
                     <td class="py-3 px-2 text-dark-muted text-xs">${r.tag}</td>
-                    <td class="py-3 px-2">${formatCurrency(r.current_value)}</td>
+                    <td class="py-3 px-2">${formatCurrency(r.current_value, r.currency)}</td>
                     <td class="py-3 px-2">${(r.ideal_percent * 100).toFixed(1)}%</td>
-                    <td class="py-3 px-2 font-bold text-brand-green">${formatCurrency(r.value_to_buy)}</td>
+                    <td class="py-3 px-2 font-bold text-brand-green">${formatCurrency(r.value_to_buy, r.currency)}</td>
                     <td class="py-3 px-2 font-bold text-brand-blue">${r.shares_to_buy.toFixed(2)}</td>
                 </tr>
                 `;
@@ -250,7 +261,10 @@ function closeModal() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 }
 
-function formatCurrency(val) {
+function formatCurrency(val, currency = 'BRL') {
+    if (currency === 'USD') {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+    }
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 

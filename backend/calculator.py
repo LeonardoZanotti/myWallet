@@ -1,22 +1,8 @@
 def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
-    """
-    assets: list of dicts with 'ticker', 'quantity', 'nota', 'tag'
-    current_prices: dict mapping ticker -> price
-    invest_brl: float
-    invest_usd: float
-    
-    This splits the BRL investment among assets ending in .SA (or tagged as Brazil),
-    and USD investment among the rest. It uses the "nota" to determine the ideal percentage
-    within that currency bucket.
-    """
-    
-    # Separate assets by currency bucket
-    # Assuming tickers with .SA are BRL, others are USD
     brl_assets = []
     usd_assets = []
     
     for a in assets:
-        # Create a copy to not mutate original directly
         asset_copy = dict(a)
         ticker = asset_copy['ticker']
         price = current_prices.get(ticker) or asset_copy.get('average_price', 0)
@@ -31,28 +17,48 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
         else:
             usd_assets.append(asset_copy)
             
-    # Calculate buys for a bucket
     def calculate_for_bucket(bucket_assets, investment_amount):
-        if not bucket_assets:
-            return []
+        if not bucket_assets or investment_amount <= 0:
+            for a in bucket_assets:
+                a['ideal_percent'] = 0
+                a['value_to_buy'] = 0
+                a['shares_to_buy'] = 0
+            return bucket_assets
             
         total_nota = sum(a.get('nota', 0) for a in bucket_assets)
         if total_nota == 0:
-            return bucket_assets # Can't distribute
+            for a in bucket_assets:
+                a['ideal_percent'] = 0
+                a['value_to_buy'] = 0
+                a['shares_to_buy'] = 0
+            return bucket_assets
             
         current_total_value = sum(a['current_value'] for a in bucket_assets)
         new_total_value = current_total_value + investment_amount
         
+        total_deficit = 0
+        
+        # Pass 1: Calculate deficits
         for a in bucket_assets:
             ideal_percent = a.get('nota', 0) / total_nota
+            a['ideal_percent'] = ideal_percent
             ideal_value = new_total_value * ideal_percent
+            deficit = ideal_value - a['current_value']
+            a['deficit'] = deficit if deficit > 0 else 0
+            total_deficit += a['deficit']
             
-            value_to_buy = ideal_value - a['current_value']
-            # We don't sell in this simple calculator, only buy
-            if value_to_buy < 0:
+        # Pass 2: Distribute available cash proportionally to deficit
+        for a in bucket_assets:
+            if total_deficit > 0:
+                # We distribute exactly investment_amount based on deficit proportion
+                proportion = a['deficit'] / total_deficit
+                # If total deficit is less than investment amount, we cap it at deficit
+                # Actually, if we invest a massive amount, everyone's deficit becomes large, 
+                # but if we just distribute investment_amount proportional to deficit, it converges to ideal.
+                value_to_buy = investment_amount * proportion
+            else:
                 value_to_buy = 0
                 
-            a['ideal_percent'] = ideal_percent
             a['value_to_buy'] = value_to_buy
             a['shares_to_buy'] = value_to_buy / a['current_price'] if a['current_price'] > 0 else 0
             

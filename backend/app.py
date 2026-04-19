@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from wallet import load_wallet, save_wallet, add_asset, update_asset, remove_asset
-from finance import get_current_prices
+from finance import get_current_prices, get_exchange_rate
 from calculator import calculate_smart_buy
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
@@ -16,7 +16,13 @@ def get_wallet():
     wallet = load_wallet()
     prices = get_current_prices(wallet['assets'])
     
+    exchange_rate = get_exchange_rate()
+    brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs', 'BR ETF']
+    
     for a in wallet['assets']:
+        tag = a.get('tag', '')
+        a['currency'] = 'BRL' if tag in brl_categories or a['ticker'].endswith('.SA') else 'USD'
+        
         a['current_price'] = prices.get(a['ticker'])
         if a['current_price']:
             a['variation'] = ((a['current_price'] - a['average_price']) / a['average_price']) * 100 if a['average_price'] > 0 else 0
@@ -25,7 +31,10 @@ def get_wallet():
             a['variation'] = 0
             a['total_value'] = a['quantity'] * a['average_price']
             
-    return jsonify(wallet)
+    return jsonify({
+        "assets": wallet['assets'],
+        "exchange_rate": exchange_rate
+    })
 
 @app.route('/api/wallet/asset', methods=['POST'])
 def create_asset():
@@ -52,6 +61,11 @@ def smart_buy():
     
     wallet = load_wallet()
     prices = get_current_prices(wallet['assets'])
+    
+    brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs', 'BR ETF']
+    for a in wallet['assets']:
+        tag = a.get('tag', '')
+        a['currency'] = 'BRL' if tag in brl_categories or a['ticker'].endswith('.SA') else 'USD'
     
     result = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd)
     return jsonify({"recommendations": result})

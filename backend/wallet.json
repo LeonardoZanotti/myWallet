@@ -1,25 +1,11 @@
 {
     "assets": [
         {
-            "ticker": "AUVP11",
-            "quantity": 11,
-            "average_price": 135,
-            "nota": 100,
-            "tag": "BR ETF"
-        },
-        {
-            "ticker": "AUPO11",
-            "quantity": 7,
-            "average_price": 102.76,
-            "nota": 50,
-            "tag": "BR ETF"
-        },
-        {
             "ticker": "NTNS11",
-            "quantity": 7,
-            "average_price": 63.06,
-            "nota": 33,
-            "tag": "BR ETF"
+            "quantity": 6,
+            "average_price": 644,
+            "nota": 76,
+            "tag": "BR ETFs"
         },
         {
             "ticker": "TMCO34",
@@ -27,6 +13,20 @@
             "average_price": 78,
             "nota": 10,
             "tag": "BDR"
+        },
+        {
+            "ticker": "HODL",
+            "quantity": 13,
+            "average_price": 40,
+            "nota": 5,
+            "tag": "Crypto"
+        },
+        {
+            "ticker": "IVV",
+            "quantity": 123,
+            "average_price": 89,
+            "nota": 16,
+            "tag": "US ETFs"
         }
     ]
 }

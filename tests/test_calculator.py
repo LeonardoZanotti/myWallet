@@ -1,41 +1,57 @@
-import pytest
 import sys
 import os
+import pytest
 
-# Add backend directory to sys.path to easily import modules for testing
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 from backend.calculator import calculate_smart_buy
 
-def test_smart_buy_calculator():
+def test_smart_buy_proportional_distribution():
     assets = [
-        {'ticker': 'BBOV11.SA', 'quantity': 10, 'average_price': 100, 'nota': 5, 'tag': 'Brazil ETF'},
-        {'ticker': 'SMAL11.SA', 'quantity': 10, 'average_price': 100, 'nota': 5, 'tag': 'Brazil ETF'},
-        {'ticker': 'VOO', 'quantity': 5, 'average_price': 400, 'nota': 10, 'tag': 'US ETF'}
+        {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'nota': 50, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 0, 'average_price': 10, 'nota': 50, 'tag': 'Ações'}
     ]
+    prices = {'A.SA': 100, 'B.SA': 10}
     
-    current_prices = {
-        'BBOV11.SA': 110,  # current value: 1100
-        'SMAL11.SA': 90,   # current value: 900
-        'VOO': 410         # current value: 2050
-    }
-    
-    # Total BRL current value = 2000
-    # Total BRL notas = 10. BBOV11 = 50%, SMAL11 = 50%
-    # If we invest 1000 BRL, new total BRL value = 3000
-    # Ideal for both = 1500
-    # BBOV11 to buy = 1500 - 1100 = 400 BRL
-    # SMAL11 to buy = 1500 - 900 = 600 BRL
-    
-    # USD: VOO current value = 2050
-    # Invest 1000 USD
-    # VOO to buy = 1000 USD
-    
-    results = calculate_smart_buy(assets, current_prices, invest_brl=1000, invest_usd=1000)
-    
+    results = calculate_smart_buy(assets, prices, invest_brl=500, invest_usd=0)
     for r in results:
-        if r['ticker'] == 'BBOV11.SA':
-            assert r['value_to_buy'] == 400
-        elif r['ticker'] == 'SMAL11.SA':
-            assert r['value_to_buy'] == 600
-        elif r['ticker'] == 'VOO':
-            assert r['value_to_buy'] == 1000
+        if r['ticker'] == 'A.SA':
+            assert r['value_to_buy'] == 0
+        elif r['ticker'] == 'B.SA':
+            assert r['value_to_buy'] == 500
+
+def test_smart_buy_split():
+    assets = [
+        {'ticker': 'A.SA', 'quantity': 0, 'nota': 50, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 0, 'nota': 50, 'tag': 'Ações'}
+    ]
+    prices = {'A.SA': 10, 'B.SA': 10}
+    
+    results = calculate_smart_buy(assets, prices, invest_brl=1000, invest_usd=0)
+    for r in results:
+        assert r['value_to_buy'] == 500
+
+def test_smart_buy_complex():
+    assets = [
+        {'ticker': 'A.SA', 'quantity': 2, 'nota': 20, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 3, 'nota': 80, 'tag': 'Ações'}
+    ]
+    prices = {'A.SA': 100, 'B.SA': 100}
+    results = calculate_smart_buy(assets, prices, invest_brl=500, invest_usd=0)
+    for r in results:
+        if r['ticker'] == 'A.SA':
+            assert r['value_to_buy'] == 0
+        elif r['ticker'] == 'B.SA':
+            assert r['value_to_buy'] == 500
+
+def test_smart_buy_limited_cash():
+    assets = [
+        {'ticker': 'A.SA', 'quantity': 0, 'nota': 50, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 5, 'nota': 50, 'tag': 'Ações'}
+    ]
+    prices = {'A.SA': 100, 'B.SA': 100}
+    results = calculate_smart_buy(assets, prices, invest_brl=100, invest_usd=0)
+    for r in results:
+        if r['ticker'] == 'A.SA':
+            assert r['value_to_buy'] == 100
+        elif r['ticker'] == 'B.SA':
+            assert r['value_to_buy'] == 0

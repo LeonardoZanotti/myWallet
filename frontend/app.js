@@ -22,7 +22,46 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.reset();
         fetchWallet();
     });
+
+    document.getElementById('edit-asset-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const ticker = document.getElementById('edit-ticker').value;
+        const data = {
+            quantity: parseFloat(document.getElementById('edit-qty').value),
+            average_price: parseFloat(document.getElementById('edit-price').value),
+            nota: parseInt(document.getElementById('edit-nota').value),
+            tag: document.getElementById('edit-tag').value
+        };
+        
+        await fetch(`/api/wallet/asset/${ticker}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        closeEditModal();
+        fetchWallet();
+    });
 });
+
+function openEditModal(ticker, qty, price, nota, tag) {
+    document.getElementById('edit-ticker').value = ticker;
+    document.getElementById('edit-ticker-display').innerText = ticker;
+    document.getElementById('edit-qty').value = qty;
+    document.getElementById('edit-price').value = price;
+    document.getElementById('edit-nota').value = nota;
+    document.getElementById('edit-tag').value = tag;
+    
+    const modal = document.getElementById('edit-modal');
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('show'), 10);
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('edit-modal');
+    modal.classList.remove('show');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
 
 async function fetchWallet() {
     try {
@@ -110,6 +149,7 @@ function renderWallet(assets) {
                 <td class="py-3 px-6 font-medium">${formatCurrency(a.total_value)}</td>
                 <td class="py-3 px-6 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.nota}</span></td>
                 <td class="py-3 px-6 text-right">
+                    <button onclick="openEditModal('${a.ticker}', ${a.quantity}, ${a.average_price}, ${a.nota}, '${a.tag}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="deleteAsset('${a.ticker}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>

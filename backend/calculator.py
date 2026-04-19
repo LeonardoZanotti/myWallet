@@ -24,7 +24,9 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
         asset_copy['current_price'] = price
         asset_copy['current_value'] = asset_copy['quantity'] * price
         
-        if ticker.endswith('.SA') or 'Brazil' in asset_copy.get('tag', ''):
+        brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs']
+        tag = asset_copy.get('tag', '')
+        if tag in brl_categories or ticker.endswith('.SA'):
             brl_assets.append(asset_copy)
         else:
             usd_assets.append(asset_copy)

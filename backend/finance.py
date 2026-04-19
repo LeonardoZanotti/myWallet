@@ -1,23 +1,27 @@
 import yfinance as yf
 
-def get_current_prices(tickers):
+def get_current_prices(assets):
     """
-    Fetches the current market price for a list of tickers.
+    Fetches the current market price for a list of assets.
     Returns a dictionary: { 'TICKER': price, ... }
     """
-    if not tickers:
+    if not assets:
         return {}
         
     prices = {}
+    brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs']
+    
     try:
-        # Download data for all tickers, we just need the last close price
-        # yf.download can be slow or have issues with single tickers returning a Series instead of DataFrame
-        # So it's better to fetch them individually or handle carefully, but Ticker is safer for few assets.
-        for ticker in tickers:
-            ticker_obj = yf.Ticker(ticker)
-            # Use fast_info if available, or history
+        for asset in assets:
+            ticker = asset['ticker']
+            tag = asset.get('tag', '')
+            
+            query_ticker = ticker
+            if tag in brl_categories and not ticker.endswith('.SA'):
+                query_ticker = ticker + '.SA'
+                
+            ticker_obj = yf.Ticker(query_ticker)
             try:
-                # get history of last 1 day
                 hist = ticker_obj.history(period="1d")
                 if not hist.empty:
                     prices[ticker] = float(hist['Close'].iloc[-1])

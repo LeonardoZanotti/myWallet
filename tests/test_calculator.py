@@ -3,9 +3,8 @@ import sys
 import os
 
 # Add backend directory to sys.path to easily import modules for testing
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../backend')))
-
-from calculator import calculate_smart_buy
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+from backend.calculator import calculate_smart_buy
 
 def test_smart_buy_calculator():
     assets = [

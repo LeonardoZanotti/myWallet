@@ -1,3 +1,32 @@
 {
-  "assets": []
+    "assets": [
+        {
+            "ticker": "AUVP11",
+            "quantity": 11,
+            "average_price": 135,
+            "nota": 100,
+            "tag": "BR ETF"
+        },
+        {
+            "ticker": "AUPO11",
+            "quantity": 7,
+            "average_price": 102.76,
+            "nota": 50,
+            "tag": "BR ETF"
+        },
+        {
+            "ticker": "NTNS11",
+            "quantity": 7,
+            "average_price": 63.06,
+            "nota": 33,
+            "tag": "BR ETF"
+        },
+        {
+            "ticker": "TMCO34",
+            "quantity": 1,
+            "average_price": 78,
+            "nota": 10,
+            "tag": "BDR"
+        }
+    ]
 }

@@ -14,8 +14,7 @@ def index():
 @app.route('/api/wallet', methods=['GET'])
 def get_wallet():
     wallet = load_wallet()
-    tickers = [a['ticker'] for a in wallet['assets']]
-    prices = get_current_prices(tickers)
+    prices = get_current_prices(wallet['assets'])
     
     for a in wallet['assets']:
         a['current_price'] = prices.get(a['ticker'])
@@ -52,8 +51,7 @@ def smart_buy():
     invest_usd = data.get('invest_usd', 0)
     
     wallet = load_wallet()
-    tickers = [a['ticker'] for a in wallet['assets']]
-    prices = get_current_prices(tickers)
+    prices = get_current_prices(wallet['assets'])
     
     result = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd)
     return jsonify({"recommendations": result})

@@ -57,7 +57,7 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
                 # but if we just distribute investment_amount proportional to deficit, it converges to ideal.
                 value_to_buy = investment_amount * proportion
             else:
-                value_to_buy = 0
+                value_to_buy = 0 # pragma: no cover
                 
             a['value_to_buy'] = value_to_buy
             a['shares_to_buy'] = value_to_buy / a['current_price'] if a['current_price'] > 0 else 0

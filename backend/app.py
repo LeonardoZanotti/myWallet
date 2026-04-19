@@ -70,5 +70,5 @@ def smart_buy():
     result = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd)
     return jsonify({"recommendations": result})
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     app.run(debug=True, port=5000)

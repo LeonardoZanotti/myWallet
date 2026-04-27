@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from wallet import load_wallet, save_wallet, add_asset, update_asset, remove_asset
+from wallet import load_wallet, save_wallet, add_asset, update_asset, remove_asset, update_group
 from finance import get_current_prices, get_exchange_rate
 from calculator import calculate_smart_buy
 
@@ -33,6 +33,7 @@ def get_wallet():
             
     return jsonify({
         "assets": wallet['assets'],
+        "groups": wallet.get('groups', {}),
         "exchange_rate": exchange_rate
     })
 
@@ -53,6 +54,12 @@ def delete_asset(ticker):
     remove_asset(ticker)
     return jsonify({"status": "success"})
 
+@app.route('/api/wallet/group/<tag>', methods=['PUT'])
+def edit_group(tag):
+    data = request.json
+    group = update_group(tag, data)
+    return jsonify(group)
+
 @app.route('/api/smart-buy', methods=['POST'])
 def smart_buy():
     data = request.json
@@ -67,7 +74,7 @@ def smart_buy():
         tag = a.get('tag', '')
         a['currency'] = 'BRL' if tag in brl_categories or a['ticker'].endswith('.SA') else 'USD'
     
-    result, leftover_brl, leftover_usd = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd)
+    result, leftover_brl, leftover_usd = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd, wallet.get('groups', {}))
     return jsonify({
         "recommendations": result,
         "leftover_brl": leftover_brl,

@@ -5,12 +5,15 @@ WALLET_FILE = os.path.join(os.path.dirname(__file__), 'wallet.json')
 
 def load_wallet():
     if not os.path.exists(WALLET_FILE):
-        return {"assets": []}
+        return {"assets": [], "groups": {}}
     with open(WALLET_FILE, 'r') as f:
         try:
-            return json.load(f)
+            data = json.load(f)
+            if "groups" not in data:
+                data["groups"] = {}
+            return data
         except json.JSONDecodeError:
-            return {"assets": []}
+            return {"assets": [], "groups": {}}
 
 def save_wallet(data):
     with open(WALLET_FILE, 'w') as f:
@@ -59,3 +62,12 @@ def remove_asset(ticker):
     wallet = load_wallet()
     wallet['assets'] = [a for a in wallet['assets'] if a['ticker'] != ticker]
     save_wallet(wallet)
+
+def update_group(tag, update_data):
+    wallet = load_wallet()
+    if tag not in wallet['groups']:
+        wallet['groups'][tag] = {}
+    for key, value in update_data.items():
+        wallet['groups'][tag][key] = value
+    save_wallet(wallet)
+    return wallet['groups'][tag]

@@ -14,15 +14,15 @@ def mock_wallet_file(tmp_path):
         yield str(wallet_file)
 
 def test_load_wallet_missing(mock_wallet_file):
-    assert wallet.load_wallet() == {"assets": []}
+    assert wallet.load_wallet() == {"assets": [], "groups": {}}
 
 def test_load_wallet_invalid_json(mock_wallet_file):
     with open(mock_wallet_file, 'w') as f:
         f.write("invalid json")
-    assert wallet.load_wallet() == {"assets": []}
+    assert wallet.load_wallet() == {"assets": [], "groups": {}}
 
 def test_save_and_load_wallet(mock_wallet_file):
-    data = {"assets": [{"ticker": "A.SA", "quantity": 10}]}
+    data = {"assets": [{"ticker": "A.SA", "quantity": 10}], "groups": {}}
     wallet.save_wallet(data)
     loaded = wallet.load_wallet()
     assert loaded == data
@@ -73,3 +73,11 @@ def test_remove_asset(mock_wallet_file):
     wallet.remove_asset('A.SA')
     loaded = wallet.load_wallet()
     assert len(loaded['assets']) == 0
+
+def test_update_group(mock_wallet_file):
+    wallet.save_wallet({"assets": [], "groups": {}})
+    updated = wallet.update_group("Ações", {"target_percent": 30})
+    assert updated["target_percent"] == 30
+    
+    loaded = wallet.load_wallet()
+    assert loaded["groups"]["Ações"]["target_percent"] == 30

@@ -61,9 +61,15 @@ python3 -m pytest tests/
 
 ## How It Works 🧠
 
-### Adding Assets
-When you add an asset, you give it a **Weight (Nota)** from 0 to 100. 
-For example, if you have two US ETFs and you assign one a Nota of `70` and the other a Nota of `30`, the application knows your ideal distribution is 70% / 30% for that asset bucket.
+### Adding Assets & Group Targets
+When you add an asset, you give it a **Weight (Nota)** from 0 to 100. This weight is relative to other assets *within the same group*. 
+
+For example, if you have two US ETFs and you assign one a Nota of `70` and the other a Nota of `30`, the application knows your ideal distribution is 70% / 30% *within the US ETFs group*.
+
+To set how much of your total investment a group should represent, you can set a **Group Target %**:
+1. Click the edit pencil next to the Group Name (e.g., `US ETFs`).
+2. Enter the desired percentage (e.g., `30` for 30% of your wallet).
+3. The calculator will now first distribute cash to groups that are below their target %, and then to the assets inside those groups based on their individual Notas.
 
 ### Smart Buy Calculator
 1. Enter the total amount you want to invest in BRL or USD.

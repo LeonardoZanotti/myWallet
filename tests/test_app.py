@@ -90,6 +90,13 @@ def test_delete_asset(mock_remove, client):
     assert response.status_code == 200
     assert response.get_json() == {"status": "success"}
 
+@patch('backend.app.update_group')
+def test_edit_group(mock_update, client):
+    mock_update.return_value = {'target_percent': 30}
+    response = client.put('/api/wallet/group/Ações', json={'target_percent': 30})
+    assert response.status_code == 200
+    assert response.get_json() == {'target_percent': 30}
+
 @patch('backend.app.load_wallet')
 @patch('backend.app.get_current_prices')
 @patch('backend.app.calculate_smart_buy')

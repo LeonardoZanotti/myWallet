@@ -119,5 +119,19 @@
             "nota": 10,
             "tag": "FII"
         }
-    ]
+    ],
+    "groups": {
+        "A\u00c3\u00a7\u00c3\u00b5es": {
+            "target_percent": 30
+        },
+        "US ETFs": {
+            "target_percent": 50
+        },
+        "BR ETFs": {
+            "target_percent": 40
+        },
+        "FII": {
+            "target_percent": 10
+        }
+    }
 }

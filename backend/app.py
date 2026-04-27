@@ -73,8 +73,10 @@ def smart_buy():
     for a in wallet['assets']:
         tag = a.get('tag', '')
         a['currency'] = 'BRL' if tag in brl_categories or a['ticker'].endswith('.SA') else 'USD'
+        
+    exchange_rate = get_exchange_rate()
     
-    result, leftover_brl, leftover_usd = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd, wallet.get('groups', {}))
+    result, leftover_brl, leftover_usd = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd, wallet.get('groups', {}), exchange_rate)
     return jsonify({
         "recommendations": result,
         "leftover_brl": leftover_brl,

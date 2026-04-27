@@ -200,24 +200,23 @@
 
     </main>
 
-    <!-- Modal for Smart Buy Recommendations -->
     <div id="recommendation-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-        <div class="bg-dark-card border border-dark-border rounded-2xl w-full max-w-3xl m-4 shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modal-content">
-            <div class="px-6 py-4 border-b border-dark-border flex justify-between items-center bg-dark-bg/50">
+        <div class="bg-dark-card border border-dark-border rounded-2xl w-full max-w-3xl m-4 shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300 flex flex-col max-h-[90vh]" id="modal-content">
+            <div class="px-6 py-4 border-b border-dark-border flex justify-between items-center bg-dark-bg/50 shrink-0">
                 <h3 class="text-xl font-bold flex items-center"><i class="fa-solid fa-basket-shopping text-brand-green mr-2"></i> Smart Buy Plan</h3>
                 <button onclick="closeModal()" class="text-dark-muted hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="p-6">
+            <div class="p-6 overflow-y-auto">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-dark-muted text-xs uppercase tracking-wider border-b border-dark-border">
                                 <th class="pb-3 px-2">Asset</th>
                                 <th class="pb-3 px-2">Tag</th>
-                                <th class="pb-3 px-2">Current Value</th>
-                                <th class="pb-3 px-2">Ideal %</th>
-                                <th class="pb-3 px-2 text-brand-green">Value to Buy</th>
-                                <th class="pb-3 px-2 text-brand-blue">Shares to Buy</th>
+                                <th class="pb-3 px-2 text-right">Current</th>
+                                <th class="pb-3 px-2 text-center">Ideal</th>
+                                <th class="pb-3 px-2 text-right text-brand-green">Smart Buy</th>
+                                <th class="pb-3 px-2 text-right text-purple-400">Post-Inv</th>
                             </tr>
                         </thead>
                         <tbody id="recommendation-body" class="text-sm divide-y divide-dark-border">
@@ -225,10 +224,10 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="leftover-container" class="mt-4 pt-4 border-t border-dark-border hidden flex items-center justify-between">
-                    <span class="text-dark-muted font-medium"><i class="fa-solid fa-piggy-bank text-brand-green mr-2"></i> Leftover Cash:</span>
-                    <span id="leftover-amount" class="font-bold text-lg text-white"></span>
-                </div>
+            </div>
+            <div id="leftover-container" class="px-6 py-4 bg-dark-bg/30 border-t border-dark-border hidden flex items-center justify-between shrink-0">
+                <span class="text-dark-muted font-medium"><i class="fa-solid fa-piggy-bank text-brand-green mr-2"></i> Leftover Cash:</span>
+                <span id="leftover-amount" class="font-bold text-lg text-white"></span>
             </div>
         </div>
     </div>

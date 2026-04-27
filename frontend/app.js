@@ -1,5 +1,6 @@
 let portfolioChartInstance = null;
 let walletGroups = {};
+let currentExchangeRate = 5.0;
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchWallet();
@@ -125,6 +126,7 @@ async function fetchWallet() {
         const response = await fetch('/api/wallet');
         const data = await response.json();
         walletGroups = data.groups || {};
+        currentExchangeRate = data.exchange_rate || 5.0;
         renderWallet(data.assets, data.exchange_rate);
     } catch (error) {
         console.error("Error fetching wallet", error);
@@ -304,26 +306,56 @@ async function calculateSmartBuy() {
         const tbody = document.getElementById('recommendation-body');
         tbody.innerHTML = '';
         
-        let hasRecommendations = false;
+        let total_brl_current = 0;
         data.recommendations.forEach(r => {
-            if (r.value_to_buy > 0) {
-                hasRecommendations = true;
-                tbody.innerHTML += `
-                <tr class="hover:bg-dark-border/20 transition-colors">
-                    <td class="py-3 px-2 font-medium">${r.ticker}</td>
-                    <td class="py-3 px-2 text-dark-muted text-xs">${r.tag}</td>
-                    <td class="py-3 px-2">${formatCurrency(r.current_value, r.currency)}</td>
-                    <td class="py-3 px-2">${(r.ideal_percent * 100).toFixed(1)}%</td>
-                    <td class="py-3 px-2 font-bold text-brand-green">${formatCurrency(r.value_to_buy, r.currency)}</td>
-                    <td class="py-3 px-2 font-bold text-brand-blue">${r.currency === 'BRL' ? Math.floor(r.shares_to_buy) : r.shares_to_buy.toFixed(2)}</td>
-                </tr>
-                `;
-            }
+            let rate = r.currency === 'USD' ? currentExchangeRate : 1.0;
+            total_brl_current += (r.current_value * rate);
         });
         
-        if (!hasRecommendations) {
-            tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-dark-muted">No purchases recommended.</td></tr>`;
-        }
+        let new_total_brl = total_brl_current + brl + (usd * currentExchangeRate);
+
+        let sortedRecs = data.recommendations.sort((a, b) => {
+            if (a.value_to_buy > 0 && b.value_to_buy === 0) return -1;
+            if (a.value_to_buy === 0 && b.value_to_buy > 0) return 1;
+            return b.ideal_percent - a.ideal_percent;
+        });
+
+        sortedRecs.forEach(r => {
+            let rate = r.currency === 'USD' ? currentExchangeRate : 1.0;
+            let current_unified = r.current_value * rate;
+            let current_pct = total_brl_current > 0 ? (current_unified / total_brl_current) * 100 : 0;
+            
+            let post_inv_native = r.current_value + r.value_to_buy;
+            let post_inv_unified = post_inv_native * rate;
+            let post_inv_pct = new_total_brl > 0 ? (post_inv_unified / new_total_brl) * 100 : 0;
+            
+            let isSkip = r.value_to_buy === 0;
+            let rowClass = isSkip ? 'opacity-40 hover:opacity-80 transition-opacity grayscale' : 'hover:bg-dark-border/20 transition-colors';
+            
+            let shares = r.currency === 'BRL' ? Math.floor(r.shares_to_buy) : r.shares_to_buy.toFixed(2);
+            let sharesText = isSkip ? '-' : `${shares} shs`;
+            let buyText = isSkip ? '-' : `+${formatCurrency(r.value_to_buy, r.currency)}`;
+            
+            tbody.innerHTML += `
+            <tr class="${rowClass} border-b border-dark-border/50 last:border-0">
+                <td class="py-3 px-2 font-medium">${r.ticker}</td>
+                <td class="py-3 px-2 text-dark-muted text-[11px] uppercase tracking-wider">${r.tag}</td>
+                <td class="py-3 px-2 text-right">
+                    <div class="font-medium">${current_pct.toFixed(1)}%</div>
+                    <div class="text-[10px] text-dark-muted">${formatCurrency(r.current_value, r.currency)}</div>
+                </td>
+                <td class="py-3 px-2 text-center font-medium">${(r.ideal_percent * 100).toFixed(1)}%</td>
+                <td class="py-3 px-2 text-right">
+                    <div class="font-bold ${isSkip ? 'text-dark-muted' : 'text-brand-green'}">${buyText}</div>
+                    <div class="text-[10px] ${isSkip ? 'text-dark-muted' : 'text-brand-blue'} font-medium">${sharesText}</div>
+                </td>
+                <td class="py-3 px-2 text-right">
+                    <div class="font-medium ${isSkip ? 'text-dark-muted' : 'text-purple-400'}">${post_inv_pct.toFixed(1)}%</div>
+                    <div class="text-[10px] ${isSkip ? 'text-dark-muted' : 'text-purple-400/70'}">${formatCurrency(post_inv_native, r.currency)}</div>
+                </td>
+            </tr>
+            `;
+        });
 
         // Handle leftover
         const leftoverContainer = document.getElementById('leftover-container');

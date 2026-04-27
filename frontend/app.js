@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const data = {
             ticker: document.getElementById('add-ticker').value.toUpperCase(),
-            quantity: parseFloat(document.getElementById('add-qty').value),
-            average_price: parseFloat(document.getElementById('add-price').value),
+            quantity: parseFloat(document.getElementById('add-qty').value.replace(',', '.')),
+            average_price: parseFloat(document.getElementById('add-price').value.replace(',', '.')),
             nota: parseInt(document.getElementById('add-nota').value),
             tag: document.getElementById('add-tag').value
         };
@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const ticker = document.getElementById('edit-ticker').value;
         const data = {
-            quantity: parseFloat(document.getElementById('edit-qty').value),
-            average_price: parseFloat(document.getElementById('edit-price').value),
+            quantity: parseFloat(document.getElementById('edit-qty').value.replace(',', '.')),
+            average_price: parseFloat(document.getElementById('edit-price').value.replace(',', '.')),
             nota: parseInt(document.getElementById('edit-nota').value),
             tag: document.getElementById('edit-tag').value
         };

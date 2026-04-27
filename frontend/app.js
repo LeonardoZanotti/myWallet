@@ -166,6 +166,14 @@ function renderWallet(assets, exchangeRate = 5.0) {
     const variationEl = document.getElementById('total-variation');
     variationEl.innerHTML = `<span class="${variation >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium flex items-center"><i class="fa-solid fa-arrow-trend-${variation >= 0 ? 'up' : 'down'} mr-1"></i> ${variation.toFixed(2)}%</span>`;
 
+    let bucketGroupTargets = { BRL: 0, USD: 0 };
+    for (const [tag, groupAssets] of Object.entries(groups)) {
+        const cur = groupAssets[0]?.currency === 'USD' ? 'USD' : 'BRL';
+        let gTarget = walletGroups[tag]?.target_percent;
+        if (gTarget === undefined || gTarget === null) gTarget = 50.0;
+        bucketGroupTargets[cur] += parseFloat(gTarget);
+    }
+
     // Render Tables
     const container = document.getElementById('asset-groups-container');
     container.innerHTML = '';
@@ -215,13 +223,23 @@ function renderWallet(assets, exchangeRate = 5.0) {
                     <tbody class="text-sm divide-y divide-dark-border">
         `;
         
+        let totalGroupNota = groupAssets.reduce((sum, a) => sum + a.nota, 0);
+        
         groupAssets.forEach(a => {
             const isPositive = a.variation >= 0;
             const priceText = a.current_price ? formatCurrency(a.current_price, a.currency) : '<span class="text-dark-muted">N/A</span>';
             
             const pctInGroup = groupTotal > 0 ? (a.total_value / groupTotal) * 100 : 0;
+            const targetPctInGroup = totalGroupNota > 0 ? (a.nota / totalGroupNota) * 100 : 0;
             const aUnifiedValue = a.total_value * (a.currency === 'USD' ? exchangeRate : 1.0);
             const aPctInWallet = totalPatrimonyUnified > 0 ? (aUnifiedValue / totalPatrimonyUnified) * 100 : 0;
+            
+            const curBucket = a.currency === 'USD' ? 'USD' : 'BRL';
+            const curBucketTotal = curBucket === 'USD' ? totalUsd * exchangeRate : totalBrl;
+            let gTarget = walletGroups[tag]?.target_percent;
+            const absoluteGroupTarget = (gTarget !== undefined && gTarget !== null) ? parseFloat(gTarget) : 0;
+            
+            const targetPctInWallet = (absoluteGroupTarget / 100) * targetPctInGroup;
             
             html += `
             <tr class="asset-row">
@@ -236,8 +254,8 @@ function renderWallet(assets, exchangeRate = 5.0) {
                 </td>
                 <td class="py-3 px-6 font-medium">${formatCurrency(a.total_value, a.currency)}</td>
                 <td class="py-3 px-6 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.nota}</span></td>
-                <td class="py-3 px-6 text-right font-medium text-dark-muted">${pctInGroup.toFixed(1)}%</td>
-                <td class="py-3 px-6 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}%</td>
+                <td class="py-3 px-6 text-right font-medium text-white">${pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
+                <td class="py-3 px-6 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInWallet.toFixed(1)}%</span></td>
                 <td class="py-3 px-6 text-right">
                     <button onclick="openEditModal('${a.ticker}', ${a.quantity}, ${a.average_price}, ${a.nota}, '${a.tag}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="deleteAsset('${a.ticker}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>

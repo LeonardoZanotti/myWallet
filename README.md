@@ -69,7 +69,10 @@ For example, if you have two US ETFs and you assign one a Nota of `70` and the o
 1. Enter the total amount you want to invest in BRL or USD.
 2. The calculator takes your current asset balances, adds your new investment amount to determine the *new total value*.
 3. It then multiplies that new total by your ideal percentages to find out what each asset's value *should* be.
-4. Finally, it tells you exactly what to buy to reach that perfect balance!
+4. **Fractional vs Integer Calculations**:
+   - **USD Assets**: Calculates and recommends fractional shares exactly to match the ideal percentage.
+   - **BRL Assets**: Calculates optimal share allocations using whole numbers (integers). It iteratively buys integer shares of the asset furthest from its target, avoiding fractional values, mimicking Brazilian broker limitations.
+5. The calculator tells you exactly what to buy and returns any leftover cash that couldn't buy a full share.
 
 ## Technology Stack 💻
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript, TailwindCSS, Chart.js

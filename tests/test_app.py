@@ -101,11 +101,15 @@ def test_smart_buy(mock_calc, mock_prices, mock_load, client):
         ]
     }
     mock_prices.return_value = {'A.SA': 20, 'VOO': 110}
-    mock_calc.return_value = [{'ticker': 'A.SA', 'value_to_buy': 100}]
+    mock_calc.return_value = ([{'ticker': 'A.SA', 'value_to_buy': 100}], 5, 0)
     
     response = client.post('/api/smart-buy', json={'invest_brl': 100, 'invest_usd': 50})
     assert response.status_code == 200
-    assert response.get_json() == {"recommendations": [{'ticker': 'A.SA', 'value_to_buy': 100}]}
+    assert response.get_json() == {
+        "recommendations": [{'ticker': 'A.SA', 'value_to_buy': 100}],
+        "leftover_brl": 5,
+        "leftover_usd": 0
+    }
     
     # Check if currencies were injected
     called_assets = mock_calc.call_args[0][0]

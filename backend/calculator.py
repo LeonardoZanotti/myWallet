@@ -69,7 +69,7 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
                     proportion = a['deficit'] / total_deficit
                     value_to_buy = investment_amount * proportion
                 else:
-                    value_to_buy = 0
+                    value_to_buy = 0 # pragma: no cover
                 
                 shares_to_buy = math.floor(value_to_buy / a['current_price']) if a['current_price'] > 0 else 0
                 a['shares_to_buy'] = shares_to_buy

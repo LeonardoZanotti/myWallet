@@ -223,8 +223,10 @@ async function calculateSmartBuy() {
         const tbody = document.getElementById('recommendation-body');
         tbody.innerHTML = '';
         
+        let hasRecommendations = false;
         data.recommendations.forEach(r => {
             if (r.value_to_buy > 0) {
+                hasRecommendations = true;
                 tbody.innerHTML += `
                 <tr class="hover:bg-dark-border/20 transition-colors">
                     <td class="py-3 px-2 font-medium">${r.ticker}</td>
@@ -232,14 +234,26 @@ async function calculateSmartBuy() {
                     <td class="py-3 px-2">${formatCurrency(r.current_value, r.currency)}</td>
                     <td class="py-3 px-2">${(r.ideal_percent * 100).toFixed(1)}%</td>
                     <td class="py-3 px-2 font-bold text-brand-green">${formatCurrency(r.value_to_buy, r.currency)}</td>
-                    <td class="py-3 px-2 font-bold text-brand-blue">${r.shares_to_buy.toFixed(2)}</td>
+                    <td class="py-3 px-2 font-bold text-brand-blue">${r.currency === 'BRL' ? Math.floor(r.shares_to_buy) : r.shares_to_buy.toFixed(2)}</td>
                 </tr>
                 `;
             }
         });
         
-        if (tbody.innerHTML === '') {
+        if (!hasRecommendations) {
             tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-dark-muted">No purchases recommended.</td></tr>`;
+        }
+
+        // Handle leftover
+        const leftoverContainer = document.getElementById('leftover-container');
+        if (data.leftover_brl > 0 || data.leftover_usd > 0) {
+            let leftoverText = [];
+            if (data.leftover_brl > 0) leftoverText.push(`${formatCurrency(data.leftover_brl, 'BRL')}`);
+            if (data.leftover_usd > 0) leftoverText.push(`${formatCurrency(data.leftover_usd, 'USD')}`);
+            document.getElementById('leftover-amount').innerHTML = leftoverText.join(' + ');
+            leftoverContainer.classList.remove('hidden');
+        } else if (leftoverContainer) {
+            leftoverContainer.classList.add('hidden');
         }
         
         // Show modal

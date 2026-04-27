@@ -1,3 +1,5 @@
+import math
+
 def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
     brl_assets = []
     usd_assets = []
@@ -17,13 +19,13 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
         else:
             usd_assets.append(asset_copy)
             
-    def calculate_for_bucket(bucket_assets, investment_amount):
+    def calculate_for_bucket(bucket_assets, investment_amount, is_brl=False):
         if not bucket_assets or investment_amount <= 0:
             for a in bucket_assets:
                 a['ideal_percent'] = 0
                 a['value_to_buy'] = 0
                 a['shares_to_buy'] = 0
-            return bucket_assets
+            return bucket_assets, investment_amount
             
         total_nota = sum(a.get('nota', 0) for a in bucket_assets)
         if total_nota == 0:
@@ -31,7 +33,7 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
                 a['ideal_percent'] = 0
                 a['value_to_buy'] = 0
                 a['shares_to_buy'] = 0
-            return bucket_assets
+            return bucket_assets, investment_amount
             
         current_total_value = sum(a['current_value'] for a in bucket_assets)
         new_total_value = current_total_value + investment_amount
@@ -47,24 +49,61 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0):
             a['deficit'] = deficit if deficit > 0 else 0
             total_deficit += a['deficit']
             
-        # Pass 2: Distribute available cash proportionally to deficit
-        for a in bucket_assets:
-            if total_deficit > 0:
-                # We distribute exactly investment_amount based on deficit proportion
-                proportion = a['deficit'] / total_deficit
-                # If total deficit is less than investment amount, we cap it at deficit
-                # Actually, if we invest a massive amount, everyone's deficit becomes large, 
-                # but if we just distribute investment_amount proportional to deficit, it converges to ideal.
-                value_to_buy = investment_amount * proportion
-            else:
-                value_to_buy = 0 # pragma: no cover
+        # Pass 2: Distribute available cash
+        if not is_brl:
+            for a in bucket_assets:
+                if total_deficit > 0:
+                    proportion = a['deficit'] / total_deficit
+                    value_to_buy = investment_amount * proportion
+                else:
+                    value_to_buy = 0 # pragma: no cover
+                    
+                a['value_to_buy'] = value_to_buy
+                a['shares_to_buy'] = value_to_buy / a['current_price'] if a['current_price'] > 0 else 0
                 
-            a['value_to_buy'] = value_to_buy
-            a['shares_to_buy'] = value_to_buy / a['current_price'] if a['current_price'] > 0 else 0
+            return bucket_assets, 0.0
+        else:
+            allocated_cash = 0
+            for a in bucket_assets:
+                if total_deficit > 0:
+                    proportion = a['deficit'] / total_deficit
+                    value_to_buy = investment_amount * proportion
+                else:
+                    value_to_buy = 0
+                
+                shares_to_buy = math.floor(value_to_buy / a['current_price']) if a['current_price'] > 0 else 0
+                a['shares_to_buy'] = shares_to_buy
+                a['value_to_buy'] = shares_to_buy * a['current_price']
+                allocated_cash += a['value_to_buy']
+                
+            remaining_cash = investment_amount - allocated_cash
             
-        return bucket_assets
+            while True:
+                best_asset = None
+                max_remaining_deficit = -1
+                
+                for a in bucket_assets:
+                    if a['current_price'] <= 0 or a['current_price'] > remaining_cash:
+                        continue
+                        
+                    ideal_value = new_total_value * a['ideal_percent']
+                    current_allocation = a['current_value'] + a['value_to_buy']
+                    remaining_deficit = ideal_value - current_allocation
+                    
+                    if remaining_deficit > max_remaining_deficit:
+                        max_remaining_deficit = remaining_deficit
+                        best_asset = a
+                        
+                if best_asset is None:
+                    break
+                    
+                best_asset['shares_to_buy'] += 1
+                best_asset['value_to_buy'] += best_asset['current_price']
+                remaining_cash -= best_asset['current_price']
+                
+            return bucket_assets, remaining_cash
 
-    brl_result = calculate_for_bucket(brl_assets, invest_brl)
-    usd_result = calculate_for_bucket(usd_assets, invest_usd)
+    brl_result, leftover_brl = calculate_for_bucket(brl_assets, invest_brl, is_brl=True)
+    usd_result, leftover_usd = calculate_for_bucket(usd_assets, invest_usd, is_brl=False)
     
-    return brl_result + usd_result
+    return brl_result + usd_result, leftover_brl, leftover_usd

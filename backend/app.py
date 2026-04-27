@@ -67,8 +67,12 @@ def smart_buy():
         tag = a.get('tag', '')
         a['currency'] = 'BRL' if tag in brl_categories or a['ticker'].endswith('.SA') else 'USD'
     
-    result = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd)
-    return jsonify({"recommendations": result})
+    result, leftover_brl, leftover_usd = calculate_smart_buy(wallet['assets'], prices, invest_brl, invest_usd)
+    return jsonify({
+        "recommendations": result,
+        "leftover_brl": leftover_brl,
+        "leftover_usd": leftover_usd
+    })
 
 if __name__ == '__main__': # pragma: no cover
     app.run(debug=True, port=5000)

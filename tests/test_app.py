@@ -73,9 +73,22 @@ def test_get_wallet_zero_avg_price(mock_exchange, mock_prices, mock_load, client
 @patch('backend.app.add_asset')
 def test_create_asset(mock_add, client):
     mock_add.return_value = {'ticker': 'A.SA'}
-    response = client.post('/api/wallet/asset', json={'ticker': 'A.SA'})
+    response = client.post('/api/wallet/asset', json={
+        'ticker': 'A.SA',
+        'quantity': 1,
+        'average_price': 10,
+        'nota': 50,
+        'tag': 'Ações'
+    })
     assert response.status_code == 200
     assert response.get_json() == {'ticker': 'A.SA'}
+
+@patch('backend.app.add_asset')
+def test_create_asset_validation_error(mock_add, client):
+    response = client.post('/api/wallet/asset', json={'ticker': '', 'quantity': -1})
+    assert response.status_code == 400
+    assert response.get_json()['error'] == 'Missing required fields: average_price, nota, tag.'
+    mock_add.assert_not_called()
 
 @patch('backend.app.update_asset')
 def test_edit_asset(mock_update, client):
@@ -84,11 +97,33 @@ def test_edit_asset(mock_update, client):
     assert response.status_code == 200
     assert response.get_json() == {'ticker': 'A.SA', 'nota': 100}
 
+@patch('backend.app.update_asset')
+def test_edit_asset_validation_error(mock_update, client):
+    response = client.put('/api/wallet/asset/A.SA', json={'nota': 'bad'})
+    assert response.status_code == 400
+    assert response.get_json()['error'] == 'nota must be an integer.'
+    mock_update.assert_not_called()
+
+@patch('backend.app.update_asset')
+def test_edit_asset_not_found(mock_update, client):
+    mock_update.return_value = None
+    response = client.put('/api/wallet/asset/A.SA', json={'nota': 100})
+    assert response.status_code == 404
+    assert response.get_json()['error'] == 'Asset not found.'
+
 @patch('backend.app.remove_asset')
 def test_delete_asset(mock_remove, client):
+    mock_remove.return_value = True
     response = client.delete('/api/wallet/asset/A.SA')
     assert response.status_code == 200
     assert response.get_json() == {"status": "success"}
+
+@patch('backend.app.remove_asset')
+def test_delete_asset_not_found(mock_remove, client):
+    mock_remove.return_value = False
+    response = client.delete('/api/wallet/asset/A.SA')
+    assert response.status_code == 404
+    assert response.get_json()['error'] == 'Asset not found.'
 
 @patch('backend.app.update_group')
 def test_edit_group(mock_update, client):
@@ -96,6 +131,13 @@ def test_edit_group(mock_update, client):
     response = client.put('/api/wallet/group/Ações', json={'target_percent': 30})
     assert response.status_code == 200
     assert response.get_json() == {'target_percent': 30}
+
+@patch('backend.app.update_group')
+def test_edit_group_validation_error(mock_update, client):
+    response = client.put('/api/wallet/group/Ações', json={'target_percent': -1})
+    assert response.status_code == 400
+    assert response.get_json()['error'] == 'Group target must be zero or greater.'
+    mock_update.assert_not_called()
 
 @patch('backend.app.load_wallet')
 @patch('backend.app.get_current_prices')
@@ -124,3 +166,10 @@ def test_smart_buy(mock_calc, mock_exchange, mock_prices, mock_load, client):
     called_assets = mock_calc.call_args[0][0]
     assert called_assets[0]['currency'] == 'BRL'
     assert called_assets[1]['currency'] == 'USD'
+
+@patch('backend.app.calculate_smart_buy')
+def test_smart_buy_validation_error(mock_calc, client):
+    response = client.post('/api/smart-buy', json={'invest_brl': -1, 'invest_usd': 0})
+    assert response.status_code == 400
+    assert response.get_json()['error'] == 'Investment amounts must be zero or greater.'
+    mock_calc.assert_not_called()

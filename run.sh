@@ -8,15 +8,6 @@ pip3 install -r requirements.txt
 
 # 2. Run tests
 echo "Running tests..."
-if ! command -v node >/dev/null 2>&1; then
-    echo "Node.js is required to run the frontend behavior tests."
-    exit 1
-fi
-node tests/frontend.spec.js
-if [ $? -ne 0 ]; then
-    echo "Frontend tests failed! Server will not start."
-    exit 1
-fi
 python3 -m pytest tests/
 
 if [ $? -eq 0 ]; then

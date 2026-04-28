@@ -2,82 +2,135 @@ let portfolioChartInstance = null;
 let walletGroups = {};
 let currentExchangeRate = 5.0;
 
+function showFeedback(message, type = 'error') {
+    const feedback = document.getElementById('app-feedback');
+    feedback.innerText = message;
+    feedback.classList.remove('hidden', 'feedback-error', 'feedback-success');
+    feedback.classList.add(type === 'success' ? 'feedback-success' : 'feedback-error');
+}
+
+function clearFeedback() {
+    const feedback = document.getElementById('app-feedback');
+    feedback.innerText = '';
+    feedback.classList.add('hidden');
+    feedback.classList.remove('feedback-error', 'feedback-success');
+}
+
+function parseLocalizedNumber(value) {
+    if (value === null || value === undefined) return null;
+    const normalized = String(value).trim();
+    if (!normalized) return null;
+    return parseFloat(normalized.replace(',', '.'));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchWallet();
     
     document.getElementById('add-asset-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearFeedback();
         const data = {
             ticker: document.getElementById('add-ticker').value.toUpperCase(),
-            quantity: parseFloat(document.getElementById('add-qty').value.replace(',', '.')),
-            average_price: parseFloat(document.getElementById('add-price').value.replace(',', '.')),
+            quantity: parseLocalizedNumber(document.getElementById('add-qty').value),
+            average_price: parseLocalizedNumber(document.getElementById('add-price').value),
             nota: parseInt(document.getElementById('add-nota').value),
             tag: document.getElementById('add-tag').value
         };
         
         showLoader();
-        await fetch('/api/wallet/asset', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        e.target.reset();
-        fetchWallet();
+        try {
+            const response = await fetch('/api/wallet/asset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                showFeedback(payload.error || 'Could not save asset.');
+                return;
+            }
+            e.target.reset();
+            showFeedback('Asset saved.', 'success');
+            await fetchWallet();
+        } finally {
+            hideLoader();
+        }
     });
 
     document.getElementById('edit-asset-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearFeedback();
         const ticker = document.getElementById('edit-ticker').value;
         const data = {
-            quantity: parseFloat(document.getElementById('edit-qty').value.replace(',', '.')),
-            average_price: parseFloat(document.getElementById('edit-price').value.replace(',', '.')),
+            quantity: parseLocalizedNumber(document.getElementById('edit-qty').value),
+            average_price: parseLocalizedNumber(document.getElementById('edit-price').value),
             nota: parseInt(document.getElementById('edit-nota').value),
             tag: document.getElementById('edit-tag').value
         };
         
         showLoader();
-        await fetch(`/api/wallet/asset/${ticker}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        closeEditModal();
-        fetchWallet();
+        try {
+            const response = await fetch(`/api/wallet/asset/${ticker}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                showFeedback(payload.error || 'Could not update asset.');
+                return;
+            }
+            closeEditModal();
+            showFeedback('Asset updated.', 'success');
+            await fetchWallet();
+        } finally {
+            hideLoader();
+        }
     });
 
     document.getElementById('group-edit-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearFeedback();
         const tag = document.getElementById('group-edit-tag').value;
         const targetVal = document.getElementById('group-edit-target').value;
         
         const data = {};
         if (targetVal.trim() !== '') {
-            data.target_percent = parseFloat(targetVal.replace(',', '.'));
+            data.target_percent = parseLocalizedNumber(targetVal);
         } else {
             data.target_percent = null; // Removing target
         }
         
         showLoader();
-        await fetch(`/api/wallet/group/${encodeURIComponent(tag)}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        closeGroupEditModal();
-        fetchWallet();
+        try {
+            const response = await fetch(`/api/wallet/group/${encodeURIComponent(tag)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                showFeedback(payload.error || 'Could not update group target.');
+                return;
+            }
+            closeGroupEditModal();
+            showFeedback('Group target updated.', 'success');
+            await fetchWallet();
+        } finally {
+            hideLoader();
+        }
     });
 });
 
 function openEditModal(ticker, qty, price, nota, tag) {
-    document.getElementById('edit-ticker').value = ticker;
-    document.getElementById('edit-ticker-display').innerText = ticker;
+    const decodedTicker = decodeURIComponent(ticker);
+    const decodedTag = decodeURIComponent(tag);
+    document.getElementById('edit-ticker').value = decodedTicker;
+    document.getElementById('edit-ticker-display').innerText = decodedTicker;
     document.getElementById('edit-qty').value = qty;
     document.getElementById('edit-price').value = price;
     document.getElementById('edit-nota').value = nota;
-    document.getElementById('edit-tag').value = tag;
+    document.getElementById('edit-tag').value = decodedTag;
     
     const modal = document.getElementById('edit-modal');
     modal.classList.remove('hidden');
@@ -91,11 +144,12 @@ function closeEditModal() {
 }
 
 function openGroupEditModal(tag) {
-    document.getElementById('group-edit-tag').value = tag;
-    document.getElementById('group-edit-tag-display').innerText = tag;
+    const decodedTag = decodeURIComponent(tag);
+    document.getElementById('group-edit-tag').value = decodedTag;
+    document.getElementById('group-edit-tag-display').innerText = decodedTag;
     
     // Set current target if it exists
-    const currentGroup = walletGroups[tag];
+    const currentGroup = walletGroups[decodedTag];
     const currentTarget = currentGroup ? currentGroup.target_percent : undefined;
     document.getElementById('group-edit-target').value = currentTarget !== undefined && currentTarget !== null ? currentTarget : '';
     
@@ -126,11 +180,17 @@ async function fetchWallet() {
     try {
         const response = await fetch('/api/wallet');
         const data = await response.json();
+        if (!response.ok) {
+            showFeedback(data.error || 'Error fetching wallet');
+            return;
+        }
+        clearFeedback();
         walletGroups = data.groups || {};
         currentExchangeRate = data.exchange_rate || 5.0;
         renderWallet(data.assets, data.exchange_rate);
     } catch (error) {
         console.error("Error fetching wallet", error);
+        showFeedback('Error fetching wallet');
     } finally {
         hideLoader();
     }
@@ -183,6 +243,17 @@ function renderWallet(assets, exchangeRate = 5.0) {
     // Render Tables
     const container = document.getElementById('asset-groups-container');
     container.innerHTML = '';
+
+    if (assets.length === 0) {
+        container.innerHTML = `
+        <div class="bg-dark-card rounded-2xl border border-dark-border shadow-lg p-10 text-center text-dark-muted">
+            <div class="text-4xl mb-3"><i class="fa-solid fa-wallet"></i></div>
+            <p class="font-medium text-white mb-1">No assets yet</p>
+            <p>Add your first asset to start tracking the wallet.</p>
+        </div>`;
+        renderChart({}, exchangeRate);
+        return;
+    }
     
     for (const [tag, groupAssets] of Object.entries(groups)) {
         const cur = groupAssets[0] ? groupAssets[0].currency : 'BRL';
@@ -201,7 +272,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
                 <div>
                     <h3 class="font-bold flex items-center">
                         <i class="fa-solid fa-layer-group text-dark-muted mr-2"></i> ${tag}
-                        <button onclick="openGroupEditModal('${tag}')" class="ml-3 text-xs text-brand-blue hover:text-blue-400"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="openGroupEditModal('${encodeURIComponent(tag)}')" class="ml-3 text-xs text-brand-blue hover:text-blue-400"><i class="fa-solid fa-pen"></i></button>
                     </h3>
                     <p class="text-xs text-dark-muted mt-1">${pctInWallet.toFixed(1)}% of Wallet • ${groupTargetStr}</p>
                 </div>
@@ -233,7 +304,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
         
         groupAssets.forEach(a => {
             const isPositive = a.variation >= 0;
-            const priceText = a.current_price ? formatCurrency(a.current_price, a.currency) : '<span class="text-dark-muted">N/A</span>';
+            const priceText = a.current_price !== null && a.current_price !== undefined ? formatCurrency(a.current_price, a.currency) : '<span class="text-dark-muted">N/A</span>';
             
             const pctInGroup = groupTotal > 0 ? (a.total_value / groupTotal) * 100 : 0;
             const targetPctInGroup = totalGroupNota > 0 ? (a.nota / totalGroupNota) * 100 : 0;
@@ -262,8 +333,8 @@ function renderWallet(assets, exchangeRate = 5.0) {
                 <td class="py-3 px-6 text-right font-medium text-white">${pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
                 <td class="py-3 px-6 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInWallet.toFixed(1)}%</span></td>
                 <td class="py-3 px-6 text-right">
-                    <button onclick="openEditModal('${a.ticker}', ${a.quantity}, ${a.average_price}, ${a.nota}, '${a.tag}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="deleteAsset('${a.ticker}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="openEditModal('${encodeURIComponent(a.ticker)}', ${a.quantity}, ${a.average_price}, ${a.nota}, '${encodeURIComponent(a.tag)}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteAsset('${encodeURIComponent(a.ticker)}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>
             `;
@@ -277,19 +348,32 @@ function renderWallet(assets, exchangeRate = 5.0) {
 }
 
 async function deleteAsset(ticker) {
-    if (confirm(`Remove ${ticker}?`)) {
+    const decodedTicker = decodeURIComponent(ticker);
+    if (confirm(`Remove ${decodedTicker}?`)) {
+        clearFeedback();
         showLoader();
-        await fetch(`/api/wallet/asset/${ticker}`, { method: 'DELETE' });
-        fetchWallet();
+        try {
+            const response = await fetch(`/api/wallet/asset/${decodedTicker}`, { method: 'DELETE' });
+            const payload = await response.json();
+            if (!response.ok) {
+                showFeedback(payload.error || 'Could not remove asset.');
+                return;
+            }
+            showFeedback('Asset removed.', 'success');
+            await fetchWallet();
+        } finally {
+            hideLoader();
+        }
     }
 }
 
 async function calculateSmartBuy() {
-    const brl = parseFloat(document.getElementById('invest-brl').value) || 0;
-    const usd = parseFloat(document.getElementById('invest-usd').value) || 0;
+    clearFeedback();
+    const brl = parseLocalizedNumber(document.getElementById('invest-brl').value) || 0;
+    const usd = parseLocalizedNumber(document.getElementById('invest-usd').value) || 0;
     
     if (brl === 0 && usd === 0) {
-        alert("Please enter an amount to invest.");
+        showFeedback("Please enter an amount to invest.");
         return;
     }
     
@@ -304,6 +388,10 @@ async function calculateSmartBuy() {
             body: JSON.stringify({ invest_brl: brl, invest_usd: usd })
         });
         const data = await response.json();
+        if (!response.ok) {
+            showFeedback(data.error || 'Error calculating');
+            return;
+        }
         
         // Populate modal
         const tbody = document.getElementById('recommendation-body');
@@ -379,7 +467,7 @@ async function calculateSmartBuy() {
         setTimeout(() => modal.classList.add('show'), 10);
         
     } catch (e) {
-        alert("Error calculating");
+        showFeedback("Error calculating");
     } finally {
         btn.innerHTML = originalText;
     }
@@ -399,6 +487,9 @@ function formatCurrency(val, currency = 'BRL') {
 }
 
 function renderChart(groups, exchangeRate = 5.0) {
+    if (typeof Chart === 'undefined') {
+        return;
+    }
     const ctx = document.getElementById('portfolioChart').getContext('2d');
     
     const labels = [];

@@ -4,9 +4,9 @@
 
 The project now includes:
 
-- deterministic backend tests
-- executable frontend behavior tests for add/edit/group/smart-buy flows
-- 100% backend coverage
+- backend request validation with clear API error messages
+- real browser-based frontend tests with Selenium
+- targeted UI fixes for feedback handling, empty states, localized smart-buy inputs, and safer inline actions
 - a wiki with the calculation rules behind every summary, row, column, and smart-buy recommendation
 
 ## Stack
@@ -14,13 +14,13 @@ The project now includes:
 - Backend: Flask, `flask-cors`, `yfinance`, `pandas`
 - Frontend: HTML, CSS, vanilla JavaScript, Tailwind CDN, Chart.js CDN
 - Storage: local JSON file at `backend/wallet.json`
-- Tests: `pytest` for Python, `node` for frontend behavior checks
+- Tests: `pytest` for backend and frontend
 
 ## Requirements
 
 - Python 3.10+
 - `pip`
-- Node.js 12+ for the frontend behavior tests
+- Chromium or Chrome plus ChromeDriver for the frontend browser tests
 
 ## Quick Start
 
@@ -32,8 +32,7 @@ chmod +x run.sh
 `run.sh` will:
 
 1. install Python dependencies from `requirements.txt`
-2. run the frontend behavior tests with Node
-3. run the Python test suite with `pytest`
+2. run the full Python test suite with `pytest`
 4. start the Flask server on `http://localhost:5000`
 
 ## Manual Start
@@ -47,7 +46,6 @@ pip3 install -r requirements.txt
 Run tests:
 
 ```bash
-node tests/frontend.spec.js
 python3 -m pytest tests/
 ```
 
@@ -77,7 +75,7 @@ Then open `http://localhost:5000`.
 - `backend/wallet.py`: JSON persistence helpers
 - `frontend/index.html`: UI structure
 - `frontend/app.js`: rendering, forms, modal flows, smart-buy UI logic
-- `tests/`: backend tests plus frontend behavior harness
+- `tests/`: backend tests plus Selenium frontend tests
 - `wiki/README.md`: detailed software and calculation guide
 
 ## Notes About Allocation Logic

@@ -15,27 +15,29 @@
     
     <link rel="stylesheet" href="styles.css">
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        dark: {
-                            bg: '#0f172a',
-                            card: '#1e293b',
-                            border: '#334155',
-                            text: '#f8fafc',
-                            muted: '#94a3b8'
-                        },
-                        brand: {
-                            green: '#10b981',
-                            greenHover: '#059669',
-                            red: '#ef4444',
-                            blue: '#3b82f6'
+        if (window.tailwind) {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Inter', 'sans-serif'] },
+                        colors: {
+                            dark: {
+                                bg: '#0f172a',
+                                card: '#1e293b',
+                                border: '#334155',
+                                text: '#f8fafc',
+                                muted: '#94a3b8'
+                            },
+                            brand: {
+                                green: '#10b981',
+                                greenHover: '#059669',
+                                red: '#ef4444',
+                                blue: '#3b82f6'
+                            }
                         }
                     }
                 }
-            }
+            };
         }
     </script>
 </head>
@@ -59,6 +61,7 @@
     </nav>
 
     <main class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div id="app-feedback" class="hidden rounded-xl border border-dark-border bg-dark-card/80 px-4 py-3 text-sm text-dark-text"></div>
         
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

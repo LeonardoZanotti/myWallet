@@ -58,3 +58,15 @@ body {
     transform: scale(1);
     opacity: 1;
 }
+
+#app-feedback.feedback-error {
+    border-color: rgba(239, 68, 68, 0.45);
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #fecaca;
+}
+
+#app-feedback.feedback-success {
+    border-color: rgba(16, 185, 129, 0.45);
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #d1fae5;
+}

@@ -19,6 +19,8 @@ It has four main jobs:
   Exposes the HTTP routes used by the frontend.
 - `backend/wallet.py`
   Reads and writes the local JSON wallet file.
+- `backend/validation.py`
+  Validates asset, group, and smart-buy payloads before business logic runs.
 - `backend/finance.py`
   Queries Yahoo Finance for current prices and the USD/BRL exchange rate.
 - `backend/calculator.py`
@@ -87,6 +89,7 @@ Returns:
 - assets with derived `currency`, `current_price`, `variation`, and `total_value`
 - saved group configuration
 - current exchange rate
+- JSON error messages when the request cannot be processed
 
 ### `POST /api/wallet/asset`
 
@@ -98,9 +101,13 @@ Adds a new asset. If the ticker already exists, quantity is merged and average p
 
 Overwrites any provided asset fields.
 
+Returns `404` when the asset does not exist.
+
 ### `DELETE /api/wallet/asset/<ticker>`
 
 Removes the asset.
+
+Returns `404` when the asset does not exist.
 
 ### `PUT /api/wallet/group/<tag>`
 
@@ -118,6 +125,8 @@ Returns:
 - `recommendations`
 - `leftover_brl`
 - `leftover_usd`
+
+Validation errors return `400` with a specific JSON message.
 
 ## 6. Dashboard calculations
 
@@ -288,6 +297,24 @@ Explicitly:
 If a group has no configured target, the UI and calculator both treat it as `50` during normalization.
 
 If every group target is absent or null, all groups become equal because each one contributes the same fallback `50`.
+
+## 6.5 UI error handling and resilience
+
+The frontend now shows inline status messages in `#app-feedback` instead of relying only on alerts.
+
+This is used for:
+
+- invalid smart-buy input
+- failed add/edit/delete actions
+- failed group target updates
+- failed wallet refreshes
+
+The frontend also guards against missing CDN scripts:
+
+- the Tailwind config script checks whether `window.tailwind` exists before using it
+- chart rendering exits early when `Chart` is unavailable
+
+That keeps the page functional in restricted or offline environments, including the real browser test environment.
 
 ## 7. Smart-buy algorithm
 
@@ -473,17 +500,15 @@ The project test suite covers:
 - finance lookups and fallback behavior
 - all smart-buy branches in the backend calculator
 - Flask routes for wallet and smart-buy APIs
-- frontend behavior for:
-  - initial wallet load
+- real browser frontend behavior for:
+  - initial page load
   - add asset submission
-  - group target editing
+  - inline smart-buy validation
   - smart-buy modal rendering
-  - target percentage display
-  - unified chart values
+  - end-to-end UI rendering with a live Flask server and Chromium
 
 Run everything with:
 
 ```bash
-node tests/frontend.spec.js
 python3 -m pytest tests/
 ```

@@ -1,86 +1,95 @@
-# myWallet 💼 
+# myWallet
 
-A sleek, locally-hosted Smart Portfolio Tracker with live market data and an intelligent buy calculator to keep your investments perfectly balanced.
+`myWallet` is a local portfolio tracker with a Flask backend, a vanilla JavaScript frontend, live Yahoo Finance prices, and a smart-buy calculator that recommends where to invest new BRL and USD cash.
 
-## Features ✨
+The project now includes:
 
-- **Live Market Data:** Automatically fetches real-time prices for your assets (US Stocks, ETFs, Brazilian B3 Assets) via Yahoo Finance (`yfinance`) without requiring any API keys.
-- **Smart Buy Calculator:** Input how much cash you want to invest (in BRL and/or USD), and the intelligent calculator tells you exactly how many shares to buy of each asset to reach your ideal portfolio weight (Nota 0-100).
-- **Custom Categorization:** Tag your assets however you want (e.g., `Crypto ETF`, `US ETF`, `Brazil FIIs`). The dashboard automatically groups and calculates the returns per category.
-- **Privacy First (Local Storage):** Your financial data never leaves your machine. Everything is saved locally to `backend/wallet.json`.
-- **Premium UI:** A beautiful dark-mode interface built with TailwindCSS and Chart.js, inspired by platforms like Investidor10.
+- deterministic backend tests
+- executable frontend behavior tests for add/edit/group/smart-buy flows
+- 100% backend coverage
+- a wiki with the calculation rules behind every summary, row, column, and smart-buy recommendation
 
-## Requirements 🛠️
+## Stack
 
-- **Python 3.10+** (Required for the backend server)
-- `pip` (Python package installer)
+- Backend: Flask, `flask-cors`, `yfinance`, `pandas`
+- Frontend: HTML, CSS, vanilla JavaScript, Tailwind CDN, Chart.js CDN
+- Storage: local JSON file at `backend/wallet.json`
+- Tests: `pytest` for Python, `node` for frontend behavior checks
 
-## Installation & Setup 🚀
+## Requirements
 
-The easiest way to start the application is by using the provided bash script.
+- Python 3.10+
+- `pip`
+- Node.js 12+ for the frontend behavior tests
 
-1. Clone or download this repository.
-2. Navigate to the project directory:
-   ```bash
-   cd myWallet
-   ```
-3. Make the runner script executable (if it isn't already):
-   ```bash
-   chmod +x run.sh
-   ```
-4. Start the application:
-   ```bash
-   ./run.sh
-   ```
+## Quick Start
 
-The script will automatically install the necessary Python dependencies (`Flask`, `yfinance`, `pytest`, `pandas`, `flask-cors`), run the tests to ensure the calculations are accurate, start the local backend server, and open your default browser to `http://localhost:5000`.
-
-## Manual Start ⚙️
-
-If you prefer to start the server manually without the script:
-
-1. Install dependencies:
-   ```bash
-   pip3 install -r requirements.txt
-   ```
-2. Start the Flask server:
-   ```bash
-   cd backend
-   python3 app.py
-   ```
-3. Open your browser and navigate to `http://localhost:5000`.
-
-## Testing 🧪
-
-The application uses Test-Driven Development (TDD) to ensure the smart buy logic is bulletproof. 
-
-To run the test suite:
 ```bash
+chmod +x run.sh
+./run.sh
+```
+
+`run.sh` will:
+
+1. install Python dependencies from `requirements.txt`
+2. run the frontend behavior tests with Node
+3. run the Python test suite with `pytest`
+4. start the Flask server on `http://localhost:5000`
+
+## Manual Start
+
+Install dependencies:
+
+```bash
+pip3 install -r requirements.txt
+```
+
+Run tests:
+
+```bash
+node tests/frontend.spec.js
 python3 -m pytest tests/
 ```
 
-## How It Works 🧠
+Start the app:
 
-### Adding Assets & Group Targets
-When you add an asset, you give it a **Weight (Nota)** from 0 to 100. This weight is relative to other assets *within the same group*. 
+```bash
+cd backend
+python3 app.py
+```
 
-For example, if you have two US ETFs and you assign one a Nota of `70` and the other a Nota of `30`, the application knows your ideal distribution is 70% / 30% *within the US ETFs group*.
+Then open `http://localhost:5000`.
 
-To set how much of your total investment a group should represent, you can set a **Group Target %**:
-1. Click the edit pencil next to the Group Name (e.g., `US ETFs`).
-2. Enter the desired percentage (e.g., `30` for 30% of your wallet).
-3. The calculator will now first distribute cash to groups that are below their target %, and then to the assets inside those groups based on their individual Notas.
+## Main Features
 
-### Smart Buy Calculator
-1. Enter the total amount you want to invest in BRL or USD.
-2. The calculator takes your current asset balances, adds your new investment amount to determine the *new total value*.
-3. It then multiplies that new total by your ideal percentages to find out what each asset's value *should* be.
-4. **Fractional vs Integer Calculations**:
-   - **USD Assets**: Calculates and recommends fractional shares exactly to match the ideal percentage.
-   - **BRL Assets**: Calculates optimal share allocations using whole numbers (integers). It iteratively buys integer shares of the asset furthest from its target, avoiding fractional values, mimicking Brazilian broker limitations.
-5. The calculator tells you exactly what to buy and returns any leftover cash that couldn't buy a full share.
+- Track BRL and USD assets in one wallet
+- Store assets and group targets locally
+- Fetch current prices and USD/BRL exchange rate from Yahoo Finance
+- View grouped wallet totals, returns, and allocation percentages
+- Edit individual assets and group target percentages from the UI
+- Calculate a smart buy plan for BRL and USD cash independently
 
-## Technology Stack 💻
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript, TailwindCSS, Chart.js
-- **Backend:** Python, Flask, `yfinance`, Pandas
-- **Storage:** JSON (`wallet.json`)
+## Project Structure
+
+- `backend/app.py`: Flask routes and API wiring
+- `backend/calculator.py`: smart-buy allocation algorithm
+- `backend/finance.py`: Yahoo Finance price and FX lookups
+- `backend/wallet.py`: JSON persistence helpers
+- `frontend/index.html`: UI structure
+- `frontend/app.js`: rendering, forms, modal flows, smart-buy UI logic
+- `tests/`: backend tests plus frontend behavior harness
+- `wiki/README.md`: detailed software and calculation guide
+
+## Notes About Allocation Logic
+
+- Group targets are normalized across all groups that exist in the wallet.
+- Asset `nota` values are normalized only inside their own group.
+- BRL cash is invested only into BRL assets; USD cash is invested only into USD assets.
+- USD recommendations can be fractional shares.
+- BRL recommendations are rounded down to whole shares, then a greedy leftover pass tries to spend the remaining BRL on the most under-allocated eligible asset.
+
+That last point means the final smart-buy result can be close to, but not always exactly equal to, the ideal allocation.
+
+## Wiki
+
+The full calculation guide lives at [wiki/README.md](/home/lzanotti/Documents/projects/myWallet/wiki/README.md).

@@ -54,17 +54,7 @@ def test_get_current_prices_empty_or_error(mock_ticker):
 def test_get_current_prices_general_exception(mock_ticker):
     mock_ticker.side_effect = Exception("General error")
     prices = get_current_prices([{'ticker': 'A'}])
-    assert prices == {} # The function actually returns {} if there is an outer exception, but wait, the exception is caught per ticker inside the loop unless yf.Ticker itself throws? Wait.
-    # If yf.Ticker throws, the inner exception block catches it and prices[ticker] = None
-    # If something outside the loop threw, it returns {}. We can just test yf.Ticker throwing and see if inner loop catches it.
-    # Ah, the code is:
-    # try:
-    #   for asset in assets:
-    #      ...
-    #      ticker_obj = yf.Ticker(...)
-    # except Exception:
-    # If yf.Ticker fails, it's inside the try of the loop, but wait, the loop doesn't have a try around yf.Ticker, only around ticker_obj.history.
-    # Let me check finance.py
+    assert prices == {}
 
 def test_get_current_prices_empty_list():
     assert get_current_prices([]) == {}

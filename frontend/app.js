@@ -95,7 +95,8 @@ function openGroupEditModal(tag) {
     document.getElementById('group-edit-tag-display').innerText = tag;
     
     // Set current target if it exists
-    const currentTarget = walletGroups[tag]?.target_percent;
+    const currentGroup = walletGroups[tag];
+    const currentTarget = currentGroup ? currentGroup.target_percent : undefined;
     document.getElementById('group-edit-target').value = currentTarget !== undefined && currentTarget !== null ? currentTarget : '';
     
     const modal = document.getElementById('group-edit-modal');
@@ -168,12 +169,15 @@ function renderWallet(assets, exchangeRate = 5.0) {
     const variationEl = document.getElementById('total-variation');
     variationEl.innerHTML = `<span class="${variation >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium flex items-center"><i class="fa-solid fa-arrow-trend-${variation >= 0 ? 'up' : 'down'} mr-1"></i> ${variation.toFixed(2)}%</span>`;
 
-    let bucketGroupTargets = { BRL: 0, USD: 0 };
+    let totalGroupTargets = 0;
     for (const [tag, groupAssets] of Object.entries(groups)) {
-        const cur = groupAssets[0]?.currency === 'USD' ? 'USD' : 'BRL';
-        let gTarget = walletGroups[tag]?.target_percent;
+        let gTarget = walletGroups[tag] ? walletGroups[tag].target_percent : undefined;
         if (gTarget === undefined || gTarget === null) gTarget = 50.0;
-        bucketGroupTargets[cur] += parseFloat(gTarget);
+        totalGroupTargets += parseFloat(gTarget);
+    }
+
+    if (totalGroupTargets === 0) {
+        totalGroupTargets = Object.keys(groups).length * 50.0;
     }
 
     // Render Tables
@@ -181,14 +185,14 @@ function renderWallet(assets, exchangeRate = 5.0) {
     container.innerHTML = '';
     
     for (const [tag, groupAssets] of Object.entries(groups)) {
-        const cur = groupAssets[0]?.currency || 'BRL';
+        const cur = groupAssets[0] ? groupAssets[0].currency : 'BRL';
         let groupTotal = groupAssets.reduce((sum, a) => sum + a.total_value, 0);
         let groupCost = groupAssets.reduce((sum, a) => sum + (a.quantity * a.average_price), 0);
         let groupVar = groupCost > 0 ? ((groupTotal - groupCost) / groupCost) * 100 : 0;
         
         let pctInWallet = totalPatrimonyUnified > 0 ? (groupTotal * (cur === 'USD' ? exchangeRate : 1.0) / totalPatrimonyUnified) * 100 : 0;
-        let groupTargetStr = walletGroups[tag]?.target_percent !== undefined && walletGroups[tag]?.target_percent !== null 
-            ? `Target: ${walletGroups[tag].target_percent}%` 
+        let groupTargetStr = walletGroups[tag] && walletGroups[tag].target_percent !== undefined && walletGroups[tag].target_percent !== null
+            ? `Target: ${walletGroups[tag].target_percent}%`
             : `No target set`;
         
         let html = `
@@ -236,12 +240,11 @@ function renderWallet(assets, exchangeRate = 5.0) {
             const aUnifiedValue = a.total_value * (a.currency === 'USD' ? exchangeRate : 1.0);
             const aPctInWallet = totalPatrimonyUnified > 0 ? (aUnifiedValue / totalPatrimonyUnified) * 100 : 0;
             
-            const curBucket = a.currency === 'USD' ? 'USD' : 'BRL';
-            const curBucketTotal = curBucket === 'USD' ? totalUsd * exchangeRate : totalBrl;
-            let gTarget = walletGroups[tag]?.target_percent;
-            const absoluteGroupTarget = (gTarget !== undefined && gTarget !== null) ? parseFloat(gTarget) : 0;
+            let gTarget = walletGroups[tag] ? walletGroups[tag].target_percent : undefined;
+            if (gTarget === undefined || gTarget === null) gTarget = 50.0;
+            const normalizedGroupTarget = totalGroupTargets > 0 ? (parseFloat(gTarget) / totalGroupTargets) * 100 : 0;
             
-            const targetPctInWallet = (absoluteGroupTarget / 100) * targetPctInGroup;
+            const targetPctInWallet = normalizedGroupTarget * (targetPctInGroup / 100);
             
             html += `
             <tr class="asset-row">
@@ -270,7 +273,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
         container.innerHTML += html;
     }
     
-    renderChart(groups);
+    renderChart(groups, exchangeRate);
 }
 
 async function deleteAsset(ticker) {
@@ -395,7 +398,7 @@ function formatCurrency(val, currency = 'BRL') {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 
-function renderChart(groups) {
+function renderChart(groups, exchangeRate = 5.0) {
     const ctx = document.getElementById('portfolioChart').getContext('2d');
     
     const labels = [];
@@ -405,7 +408,10 @@ function renderChart(groups) {
     let i = 0;
     for (const [tag, groupAssets] of Object.entries(groups)) {
         labels.push(tag);
-        data.push(groupAssets.reduce((sum, a) => sum + a.total_value, 0));
+        data.push(groupAssets.reduce((sum, a) => {
+            const rate = a.currency === 'USD' ? exchangeRate : 1.0;
+            return sum + (a.total_value * rate);
+        }, 0));
         i++;
     }
     

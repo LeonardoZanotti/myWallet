@@ -4,14 +4,14 @@
             "ticker": "IVV",
             "quantity": 0.17553714,
             "average_price": 712.1,
-            "nota": 40,
+            "nota": 30,
             "tag": "US ETFs"
         },
         {
             "ticker": "VT",
             "quantity": 1.10843614,
             "average_price": 150.37,
-            "nota": 30,
+            "nota": 40,
             "tag": "US ETFs"
         },
         {

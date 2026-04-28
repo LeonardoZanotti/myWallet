@@ -116,3 +116,75 @@ def test_smart_buy_brl_leftover_greedy():
     assert b_res['value_to_buy'] == 40
     assert leftover_brl == 20
     assert leftover_usd == 0
+
+def test_smart_buy_brl_bucket_without_deficit_leaves_brl_cash_unallocated():
+    assets = [
+        {'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'nota': 50, 'tag': 'Ações'},
+        {'ticker': 'VOO', 'quantity': 0, 'average_price': 100, 'nota': 50, 'tag': 'US ETFs'}
+    ]
+    prices = {'A.SA': 10, 'VOO': 100}
+    groups = {
+        'Ações': {'target_percent': 0},
+        'US ETFs': {'target_percent': 100}
+    }
+
+    results, leftover_brl, leftover_usd = calculate_smart_buy(
+        assets,
+        prices,
+        invest_brl=200,
+        invest_usd=0,
+        groups_config=groups
+    )
+
+    by_ticker = {asset['ticker']: asset for asset in results}
+    assert by_ticker['A.SA']['value_to_buy'] == 0
+    assert leftover_brl == 200
+    assert leftover_usd == 0
+
+def test_smart_buy_usd_bucket_without_deficit_leaves_usd_cash_unallocated():
+    assets = [
+        {'ticker': 'A.SA', 'quantity': 0, 'average_price': 10, 'nota': 50, 'tag': 'Ações'},
+        {'ticker': 'VOO', 'quantity': 1, 'average_price': 100, 'nota': 50, 'tag': 'US ETFs'}
+    ]
+    prices = {'A.SA': 10, 'VOO': 100}
+    groups = {
+        'Ações': {'target_percent': 100},
+        'US ETFs': {'target_percent': 0}
+    }
+
+    results, leftover_brl, leftover_usd = calculate_smart_buy(
+        assets,
+        prices,
+        invest_brl=0,
+        invest_usd=50,
+        groups_config=groups
+    )
+
+    by_ticker = {asset['ticker']: asset for asset in results}
+    assert by_ticker['VOO']['value_to_buy'] == 0
+    assert leftover_brl == 0
+    assert leftover_usd == 50
+
+def test_smart_buy_respects_normalized_group_targets():
+    assets = [
+        {'ticker': 'BR.SA', 'quantity': 0, 'average_price': 10, 'nota': 100, 'tag': 'Ações'},
+        {'ticker': 'VOO', 'quantity': 0, 'average_price': 100, 'nota': 100, 'tag': 'US ETFs'}
+    ]
+    prices = {'BR.SA': 10, 'VOO': 100}
+    groups = {
+        'Ações': {'target_percent': 30},
+        'US ETFs': {'target_percent': 20}
+    }
+
+    results, _, _ = calculate_smart_buy(
+        assets,
+        prices,
+        invest_brl=300,
+        invest_usd=200,
+        groups_config=groups,
+        exchange_rate=5.0
+    )
+
+    by_ticker = {asset['ticker']: asset for asset in results}
+    assert by_ticker['BR.SA']['ideal_percent'] == pytest.approx(0.6)
+    assert by_ticker['VOO']['ideal_percent'] == pytest.approx(0.4)

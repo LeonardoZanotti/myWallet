@@ -99,8 +99,9 @@ def test_edit_group(mock_update, client):
 
 @patch('backend.app.load_wallet')
 @patch('backend.app.get_current_prices')
+@patch('backend.app.get_exchange_rate')
 @patch('backend.app.calculate_smart_buy')
-def test_smart_buy(mock_calc, mock_prices, mock_load, client):
+def test_smart_buy(mock_calc, mock_exchange, mock_prices, mock_load, client):
     mock_load.return_value = {
         "assets": [
             {'ticker': 'A.SA', 'tag': 'Ações'},
@@ -108,6 +109,7 @@ def test_smart_buy(mock_calc, mock_prices, mock_load, client):
         ]
     }
     mock_prices.return_value = {'A.SA': 20, 'VOO': 110}
+    mock_exchange.return_value = 5.0
     mock_calc.return_value = ([{'ticker': 'A.SA', 'value_to_buy': 100}], 5, 0)
     
     response = client.post('/api/smart-buy', json={'invest_brl': 100, 'invest_usd': 50})

@@ -21,6 +21,11 @@ def test_load_wallet_invalid_json(mock_wallet_file):
         f.write("invalid json")
     assert wallet.load_wallet() == {"assets": [], "groups": {}}
 
+def test_load_wallet_adds_missing_groups_key(mock_wallet_file):
+    with open(mock_wallet_file, 'w') as f:
+        json.dump({"assets": [{"ticker": "A.SA"}]}, f)
+    assert wallet.load_wallet() == {"assets": [{"ticker": "A.SA"}], "groups": {}}
+
 def test_save_and_load_wallet(mock_wallet_file):
     data = {"assets": [{"ticker": "A.SA", "quantity": 10}], "groups": {}}
     wallet.save_wallet(data)

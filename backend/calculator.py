@@ -1,9 +1,6 @@
 import math
 
-try:
-    from .config import BRL_CATEGORIES
-except ImportError:  # pragma: no cover
-    from config import BRL_CATEGORIES
+from backend.config import BRL_CATEGORIES
 def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0, groups_config=None, exchange_rate=5.0):
     if groups_config is None:
         groups_config = {}
@@ -22,18 +19,18 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0, 
         
         tag = asset_copy.get('tag', 'Outros')
         
-        is_brl = tag in BRL_CATEGORIES or ticker.endswith('.SA')
+        is_brl = tag in BRL_CATEGORIES
         asset_copy['currency'] = 'BRL' if is_brl else 'USD'
         
         asset_copy['current_value_brl'] = asset_copy['current_value_native'] if is_brl else asset_copy['current_value_native'] * exchange_rate
         current_total_wallet_brl += asset_copy['current_value_brl']
         
         if tag not in groups:
-            groups[tag] = {'assets': [], 'current_value_brl': 0, 'total_asset_nota': 0, 'currency': asset_copy['currency']}
+            groups[tag] = {'assets': [], 'current_value_brl': 0, 'total_asset_weight': 0, 'currency': asset_copy['currency']}
         
         groups[tag]['assets'].append(asset_copy)
         groups[tag]['current_value_brl'] += asset_copy['current_value_brl']
-        groups[tag]['total_asset_nota'] += float(asset_copy.get('nota', 0))
+        groups[tag]['total_asset_weight'] += float(asset_copy.get('weight', 0))
 
     if not assets or (invest_brl <= 0 and invest_usd <= 0):
         for a in assets:
@@ -83,13 +80,13 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0, 
     # Step 4: Asset level allocation
     result = []
     for tag, g_data in groups.items():
-        g_total_asset_nota = g_data['total_asset_nota']
+        g_total_asset_weight = g_data['total_asset_weight']
         g_ideal_value_brl = g_data['ideal_value_brl']
         
         g_total_asset_deficit_native = 0
         for a in g_data['assets']:
-            if g_total_asset_nota > 0:
-                a_pct_in_group = a.get('nota', 0) / g_total_asset_nota
+            if g_total_asset_weight > 0:
+                a_pct_in_group = a.get('weight', 0) / g_total_asset_weight
                 a['ideal_percent'] = a_pct_in_group * g_data['ideal_percent']
                 a_ideal_value_brl = g_ideal_value_brl * a_pct_in_group
             else:

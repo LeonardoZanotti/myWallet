@@ -25,7 +25,7 @@ def _to_int(value, field_name):
 def validate_asset_payload(data, partial=False):
     data = _require_mapping(data)
     cleaned = {}
-    required_fields = ['ticker', 'quantity', 'average_price', 'nota', 'tag']
+    required_fields = ['ticker', 'quantity', 'average_price', 'weight', 'tag']
 
     if not partial:
         missing = [field for field in required_fields if field not in data]
@@ -50,11 +50,11 @@ def validate_asset_payload(data, partial=False):
             raise ValidationError('Average price must be zero or greater.')
         cleaned['average_price'] = average_price
 
-    if 'nota' in data:
-        nota = _to_int(data.get('nota'), 'nota')
-        if nota < 0 or nota > 100:
-            raise ValidationError('Nota must be between 0 and 100.')
-        cleaned['nota'] = nota
+    if 'weight' in data:
+        weight = _to_int(data.get('weight'), 'weight')
+        if weight < 0 or weight > 100:
+            raise ValidationError('Weight must be between 0 and 100.')
+        cleaned['weight'] = weight
 
     if 'tag' in data:
         tag = str(data.get('tag', '')).strip()

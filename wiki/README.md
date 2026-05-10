@@ -42,7 +42,7 @@ Each asset in `wallet.json` is expected to carry:
 - `ticker`
 - `quantity`
 - `average_price`
-- `nota`
+- `weight`
 - `tag`
 
 Derived fields added at runtime include:
@@ -67,12 +67,13 @@ This is the configured group weight before normalization.
 
 ## 4. Currency classification
 
-The code treats an asset as BRL when either of these is true:
-
-- `tag` is one of `BDR`, `FII`, `Ações`, `BR ETFs`, `BR ETF`
-- `ticker` ends with `.SA`
+The code treats an asset as BRL when its `tag` belongs to the configured `BRL_CATEGORIES` (e.g., `BDR`, `FII`, `Ações`, `BR ETFs`).
 
 Otherwise, the asset is treated as USD.
+
+### Note on Yahoo Finance and the `.SA` suffix
+Yahoo Finance requires the `.SA` suffix to locate Brazilian assets traded on the B3 exchange (e.g. `BBOV11` must be queried as `BBOV11.SA`). U.S. ETFs (like `VT`, `IVV`) do not require a suffix because Yahoo defaults to US exchanges. 
+Our finance module handles this invisibly by appending `.SA` to the ticker before querying the Yahoo API if the asset belongs to a BRL category.
 
 This affects:
 
@@ -249,7 +250,7 @@ If `current_price` is missing, backend fallback is:
 
 #### Weight
 
-Raw asset `nota`.
+Raw asset `weight`.
 
 #### % Group
 
@@ -264,9 +265,9 @@ Actual formula:
 
 Target formula:
 
-`(asset.nota / total_group_nota) * 100`
+`(asset.weight / total_group_weight) * 100`
 
-If group total or total group nota is zero, the corresponding percentage is `0`.
+If group total or total group weight is zero, the corresponding percentage is `0`.
 
 #### % Wallet
 
@@ -292,7 +293,7 @@ Explicitly:
 
 `normalized_group_target = group_target_percent / sum(all_group_target_percents)`
 
-`target_wallet_share = normalized_group_target * (asset.nota / total_group_nota)`
+`target_wallet_share = normalized_group_target * (asset.weight / total_group_weight)`
 
 If a group has no configured target, the UI and calculator both treat it as `50` during normalization.
 
@@ -389,7 +390,7 @@ If a bucket has zero deficit, no cash from that bucket is allocated and it becom
 
 Inside each group:
 
-`asset_pct_in_group = asset.nota / total_group_nota`
+`asset_pct_in_group = asset.weight / total_group_weight`
 
 `asset_ideal_percent = asset_pct_in_group * group_ideal_percent`
 
@@ -408,7 +409,7 @@ Group cash is distributed proportionally to those asset deficits:
 
 `asset_value_to_buy_fractional = group_cash_to_invest_native * (asset_deficit_native / total_group_asset_deficit_native)`
 
-If total group nota is zero, the assets in that group get `ideal_percent = 0` and receive no allocation.
+If total group weight is zero, the assets in that group get `ideal_percent = 0` and receive no allocation.
 
 ### Stage 5: convert allocations into orders
 

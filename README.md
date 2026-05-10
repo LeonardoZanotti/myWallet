@@ -81,7 +81,7 @@ Then open `http://localhost:5000`.
 ## Notes About Allocation Logic
 
 - Group targets are normalized across all groups that exist in the wallet.
-- Asset `nota` values are normalized only inside their own group.
+- Asset `weight` values are normalized only inside their own group.
 - BRL cash is invested only into BRL assets; USD cash is invested only into USD assets.
 - USD recommendations can be fractional shares.
 - BRL recommendations are rounded down to whole shares, then a greedy leftover pass tries to spend the remaining BRL on the most under-allocated eligible asset.

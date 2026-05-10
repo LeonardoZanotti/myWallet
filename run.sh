@@ -16,8 +16,7 @@ if [ $? -eq 0 ]; then
     (sleep 2 && echo "Opening browser at http://localhost:5000" && (xdg-open "http://localhost:5000" || open "http://localhost:5000" || echo "Please open manually")) &
     
     # 4. Start server in foreground so Ctrl+C kills it natively
-    cd backend
-    python3 app.py
+    python3 -m backend.app
 else
     echo "Tests failed! Server will not start."
     exit 1

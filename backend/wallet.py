@@ -25,7 +25,7 @@ def add_asset(asset_data):
     - ticker: str (e.g., 'BBOV11.SA')
     - quantity: float
     - average_price: float
-    - nota: int (weight)
+    - weight: int (weight)
     - tag: str (e.g., 'Brazil ETF')
     """
     wallet = load_wallet()
@@ -38,7 +38,7 @@ def add_asset(asset_data):
             asset['average_price'] = total_value / total_qty
             asset['quantity'] = total_qty
             # Update other fields if provided
-            if 'nota' in asset_data: asset['nota'] = asset_data['nota']
+            if 'weight' in asset_data: asset['weight'] = asset_data['weight']
             if 'tag' in asset_data: asset['tag'] = asset_data['tag']
             save_wallet(wallet)
             return asset

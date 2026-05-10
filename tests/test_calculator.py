@@ -7,8 +7,8 @@ from backend.calculator import calculate_smart_buy
 
 def test_smart_buy_proportional_distribution():
     assets = [
-        {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'nota': 50, 'tag': 'Ações'},
-        {'ticker': 'B.SA', 'quantity': 0, 'average_price': 10, 'nota': 50, 'tag': 'Ações'}
+        {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'weight': 50, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 0, 'average_price': 10, 'weight': 50, 'tag': 'Ações'}
     ]
     prices = {'A.SA': 100, 'B.SA': 10}
     
@@ -21,8 +21,8 @@ def test_smart_buy_proportional_distribution():
 
 def test_smart_buy_split():
     assets = [
-        {'ticker': 'A.SA', 'quantity': 0, 'nota': 50, 'tag': 'Ações'},
-        {'ticker': 'B.SA', 'quantity': 0, 'nota': 50, 'tag': 'Ações'}
+        {'ticker': 'A.SA', 'quantity': 0, 'weight': 50, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 0, 'weight': 50, 'tag': 'Ações'}
     ]
     prices = {'A.SA': 10, 'B.SA': 10}
     
@@ -32,8 +32,8 @@ def test_smart_buy_split():
 
 def test_smart_buy_complex():
     assets = [
-        {'ticker': 'A.SA', 'quantity': 2, 'nota': 20, 'tag': 'Ações'},
-        {'ticker': 'B.SA', 'quantity': 3, 'nota': 80, 'tag': 'Ações'}
+        {'ticker': 'A.SA', 'quantity': 2, 'weight': 20, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 3, 'weight': 80, 'tag': 'Ações'}
     ]
     prices = {'A.SA': 100, 'B.SA': 100}
     results, leftover_brl, leftover_usd = calculate_smart_buy(assets, prices, invest_brl=500, invest_usd=0)
@@ -45,8 +45,8 @@ def test_smart_buy_complex():
 
 def test_smart_buy_limited_cash():
     assets = [
-        {'ticker': 'A.SA', 'quantity': 0, 'nota': 50, 'tag': 'Ações'},
-        {'ticker': 'B.SA', 'quantity': 5, 'nota': 50, 'tag': 'Ações'}
+        {'ticker': 'A.SA', 'quantity': 0, 'weight': 50, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 5, 'weight': 50, 'tag': 'Ações'}
     ]
     prices = {'A.SA': 100, 'B.SA': 100}
     results, leftover_brl, leftover_usd = calculate_smart_buy(assets, prices, invest_brl=100, invest_usd=0)
@@ -57,15 +57,15 @@ def test_smart_buy_limited_cash():
             assert r['value_to_buy'] == 0
 
 def test_smart_buy_zero_investment():
-    assets = [{'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'nota': 50, 'tag': 'Ações'}]
+    assets = [{'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'weight': 50, 'tag': 'Ações'}]
     prices = {'A.SA': 10}
     results, leftover_brl, leftover_usd = calculate_smart_buy(assets, prices, invest_brl=0, invest_usd=0)
     assert results[0]['value_to_buy'] == 0
     assert results[0]['shares_to_buy'] == 0
     assert results[0]['ideal_percent'] == 0
 
-def test_smart_buy_zero_nota():
-    assets = [{'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'nota': 0, 'tag': 'Ações'}]
+def test_smart_buy_zero_weight():
+    assets = [{'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'weight': 0, 'tag': 'Ações'}]
     prices = {'A.SA': 10}
     results, leftover_brl, leftover_usd = calculate_smart_buy(assets, prices, invest_brl=100, invest_usd=0)
     assert results[0]['value_to_buy'] == 0
@@ -73,13 +73,13 @@ def test_smart_buy_zero_nota():
     assert results[0]['ideal_percent'] == 0
 
 def test_smart_buy_missing_prices():
-    assets = [{'ticker': 'A.SA', 'quantity': 10, 'average_price': 20, 'nota': 50, 'tag': 'Ações'}]
+    assets = [{'ticker': 'A.SA', 'quantity': 10, 'average_price': 20, 'weight': 50, 'tag': 'Ações'}]
     prices = {} # Missing price
     results, leftover_brl, leftover_usd = calculate_smart_buy(assets, prices, invest_brl=100, invest_usd=0)
     assert results[0]['current_price'] == 20 # Should fallback to average_price
 
 def test_smart_buy_usd_assets():
-    assets = [{'ticker': 'VOO', 'quantity': 10, 'average_price': 100, 'nota': 100, 'tag': 'US ETFs'}]
+    assets = [{'ticker': 'VOO', 'quantity': 10, 'average_price': 100, 'weight': 100, 'tag': 'US ETFs'}]
     prices = {'VOO': 100}
     results, leftover_brl, leftover_usd = calculate_smart_buy(assets, prices, invest_brl=0, invest_usd=100)
     assert len(results) == 1
@@ -92,9 +92,9 @@ def test_smart_buy_empty_assets():
 def test_smart_buy_brl_leftover_greedy():
     # Force the greedy algorithm to trigger
     assets = [
-        {'ticker': 'A.SA', 'quantity': 0, 'average_price': 50, 'nota': 50, 'tag': 'Ações'},
-        {'ticker': 'B.SA', 'quantity': 0, 'average_price': 20, 'nota': 50, 'tag': 'Ações'},
-        {'ticker': 'C.SA', 'quantity': 0, 'average_price': 0, 'nota': 50, 'tag': 'Ações'} # zero price
+        {'ticker': 'A.SA', 'quantity': 0, 'average_price': 50, 'weight': 50, 'tag': 'Ações'},
+        {'ticker': 'B.SA', 'quantity': 0, 'average_price': 20, 'weight': 50, 'tag': 'Ações'},
+        {'ticker': 'C.SA', 'quantity': 0, 'average_price': 0, 'weight': 50, 'tag': 'Ações'} # zero price
     ]
     prices = {'A.SA': 50, 'B.SA': 20, 'C.SA': 0}
     # Invest 60. Ideal: 30 each for A and B.
@@ -119,8 +119,8 @@ def test_smart_buy_brl_leftover_greedy():
 
 def test_smart_buy_brl_bucket_without_deficit_leaves_brl_cash_unallocated():
     assets = [
-        {'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'nota': 50, 'tag': 'Ações'},
-        {'ticker': 'VOO', 'quantity': 0, 'average_price': 100, 'nota': 50, 'tag': 'US ETFs'}
+        {'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'weight': 50, 'tag': 'Ações'},
+        {'ticker': 'VOO', 'quantity': 0, 'average_price': 100, 'weight': 50, 'tag': 'US ETFs'}
     ]
     prices = {'A.SA': 10, 'VOO': 100}
     groups = {
@@ -143,8 +143,8 @@ def test_smart_buy_brl_bucket_without_deficit_leaves_brl_cash_unallocated():
 
 def test_smart_buy_usd_bucket_without_deficit_leaves_usd_cash_unallocated():
     assets = [
-        {'ticker': 'A.SA', 'quantity': 0, 'average_price': 10, 'nota': 50, 'tag': 'Ações'},
-        {'ticker': 'VOO', 'quantity': 1, 'average_price': 100, 'nota': 50, 'tag': 'US ETFs'}
+        {'ticker': 'A.SA', 'quantity': 0, 'average_price': 10, 'weight': 50, 'tag': 'Ações'},
+        {'ticker': 'VOO', 'quantity': 1, 'average_price': 100, 'weight': 50, 'tag': 'US ETFs'}
     ]
     prices = {'A.SA': 10, 'VOO': 100}
     groups = {
@@ -167,8 +167,8 @@ def test_smart_buy_usd_bucket_without_deficit_leaves_usd_cash_unallocated():
 
 def test_smart_buy_respects_normalized_group_targets():
     assets = [
-        {'ticker': 'BR.SA', 'quantity': 0, 'average_price': 10, 'nota': 100, 'tag': 'Ações'},
-        {'ticker': 'VOO', 'quantity': 0, 'average_price': 100, 'nota': 100, 'tag': 'US ETFs'}
+        {'ticker': 'BR.SA', 'quantity': 0, 'average_price': 10, 'weight': 100, 'tag': 'Ações'},
+        {'ticker': 'VOO', 'quantity': 0, 'average_price': 100, 'weight': 100, 'tag': 'US ETFs'}
     ]
     prices = {'BR.SA': 10, 'VOO': 100}
     groups = {

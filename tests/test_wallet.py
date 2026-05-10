@@ -33,7 +33,7 @@ def test_save_and_load_wallet(mock_wallet_file):
     assert loaded == data
 
 def test_add_asset_new(mock_wallet_file):
-    asset_data = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'nota': 50, 'tag': 'Ações'}
+    asset_data = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'weight': 50, 'tag': 'Ações'}
     result = wallet.add_asset(asset_data)
     assert result == asset_data
     
@@ -43,16 +43,16 @@ def test_add_asset_new(mock_wallet_file):
 
 def test_add_asset_existing(mock_wallet_file):
     # Add first time
-    asset_data1 = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'nota': 50, 'tag': 'Ações'}
+    asset_data1 = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'weight': 50, 'tag': 'Ações'}
     wallet.add_asset(asset_data1)
     
     # Add second time
-    asset_data2 = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 50, 'nota': 80, 'tag': 'New Tag'}
+    asset_data2 = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 50, 'weight': 80, 'tag': 'New Tag'}
     result = wallet.add_asset(asset_data2)
     
     assert result['quantity'] == 20
     assert result['average_price'] == 75.0
-    assert result['nota'] == 80
+    assert result['weight'] == 80
     assert result['tag'] == 'New Tag'
     
     loaded = wallet.load_wallet()
@@ -60,19 +60,19 @@ def test_add_asset_existing(mock_wallet_file):
     assert loaded['assets'][0]['quantity'] == 20
 
 def test_update_asset(mock_wallet_file):
-    asset_data = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'nota': 50, 'tag': 'Ações'}
+    asset_data = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'weight': 50, 'tag': 'Ações'}
     wallet.add_asset(asset_data)
     
-    result = wallet.update_asset('A.SA', {'nota': 100, 'quantity': 5})
-    assert result['nota'] == 100
+    result = wallet.update_asset('A.SA', {'weight': 100, 'quantity': 5})
+    assert result['weight'] == 100
     assert result['quantity'] == 5
     
     # Update non-existent
-    result_none = wallet.update_asset('B.SA', {'nota': 100})
+    result_none = wallet.update_asset('B.SA', {'weight': 100})
     assert result_none is None
 
 def test_remove_asset(mock_wallet_file):
-    asset_data = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'nota': 50, 'tag': 'Ações'}
+    asset_data = {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'weight': 50, 'tag': 'Ações'}
     wallet.add_asset(asset_data)
     
     wallet.remove_asset('A.SA')

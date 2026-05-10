@@ -77,7 +77,7 @@ def test_create_asset(mock_add, client):
         'ticker': 'A.SA',
         'quantity': 1,
         'average_price': 10,
-        'nota': 50,
+        'weight': 50,
         'tag': 'Ações'
     })
     assert response.status_code == 200
@@ -87,27 +87,27 @@ def test_create_asset(mock_add, client):
 def test_create_asset_validation_error(mock_add, client):
     response = client.post('/api/wallet/asset', json={'ticker': '', 'quantity': -1})
     assert response.status_code == 400
-    assert response.get_json()['error'] == 'Missing required fields: average_price, nota, tag.'
+    assert response.get_json()['error'] == 'Missing required fields: average_price, weight, tag.'
     mock_add.assert_not_called()
 
 @patch('backend.app.update_asset')
 def test_edit_asset(mock_update, client):
-    mock_update.return_value = {'ticker': 'A.SA', 'nota': 100}
-    response = client.put('/api/wallet/asset/A.SA', json={'nota': 100})
+    mock_update.return_value = {'ticker': 'A.SA', 'weight': 100}
+    response = client.put('/api/wallet/asset/A.SA', json={'weight': 100})
     assert response.status_code == 200
-    assert response.get_json() == {'ticker': 'A.SA', 'nota': 100}
+    assert response.get_json() == {'ticker': 'A.SA', 'weight': 100}
 
 @patch('backend.app.update_asset')
 def test_edit_asset_validation_error(mock_update, client):
-    response = client.put('/api/wallet/asset/A.SA', json={'nota': 'bad'})
+    response = client.put('/api/wallet/asset/A.SA', json={'weight': 'bad'})
     assert response.status_code == 400
-    assert response.get_json()['error'] == 'nota must be an integer.'
+    assert response.get_json()['error'] == 'weight must be an integer.'
     mock_update.assert_not_called()
 
 @patch('backend.app.update_asset')
 def test_edit_asset_not_found(mock_update, client):
     mock_update.return_value = None
-    response = client.put('/api/wallet/asset/A.SA', json={'nota': 100})
+    response = client.put('/api/wallet/asset/A.SA', json={'weight': 100})
     assert response.status_code == 404
     assert response.get_json()['error'] == 'Asset not found.'
 

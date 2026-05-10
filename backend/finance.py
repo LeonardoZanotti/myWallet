@@ -1,9 +1,12 @@
 import yfinance as yf
 
-try:
-    from .config import BRL_CATEGORIES
-except ImportError:  # pragma: no cover
-    from config import BRL_CATEGORIES
+from backend.config import BRL_CATEGORIES
+
+def _format_ticker_for_yahoo(ticker, tag):
+    if tag in BRL_CATEGORIES and not ticker.endswith('.SA'):
+        return f"{ticker}.SA"
+    return ticker
+
 def get_current_prices(assets):
     """
     Fetches the current market price for a list of assets.
@@ -18,9 +21,7 @@ def get_current_prices(assets):
             ticker = asset['ticker']
             tag = asset.get('tag', '')
             
-            query_ticker = ticker
-            if tag in BRL_CATEGORIES and not ticker.endswith('.SA'):
-                query_ticker = ticker + '.SA'
+            query_ticker = _format_ticker_for_yahoo(ticker, tag)
                 
             ticker_obj = yf.Ticker(query_ticker)
             try:

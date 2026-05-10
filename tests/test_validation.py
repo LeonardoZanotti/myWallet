@@ -17,7 +17,7 @@ def test_validate_asset_payload_success():
         'ticker': 'voo',
         'quantity': '1.5',
         'average_price': '100',
-        'nota': '40',
+        'weight': '40',
         'tag': 'US ETFs',
         'manual_price': ''
     })
@@ -25,7 +25,7 @@ def test_validate_asset_payload_success():
         'ticker': 'VOO',
         'quantity': 1.5,
         'average_price': 100.0,
-        'nota': 40,
+        'weight': 40,
         'tag': 'US ETFs',
         'manual_price': None
     }
@@ -33,12 +33,12 @@ def test_validate_asset_payload_success():
 
 @pytest.mark.parametrize('payload,error_message', [
     (None, 'Invalid JSON payload.'),
-    ({'ticker': ''}, 'Missing required fields: quantity, average_price, nota, tag.'),
-    ({'ticker': 'A', 'quantity': -1, 'average_price': 1, 'nota': 10, 'tag': 'Ações'}, 'Quantity must be zero or greater.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': -1, 'nota': 10, 'tag': 'Ações'}, 'Average price must be zero or greater.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'nota': 101, 'tag': 'Ações'}, 'Nota must be between 0 and 100.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'nota': 10, 'tag': ''}, 'Category is required.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'nota': 10, 'tag': 'Ações', 'manual_price': -1}, 'Manual price must be zero or greater.'),
+    ({'ticker': ''}, 'Missing required fields: quantity, average_price, weight, tag.'),
+    ({'ticker': 'A', 'quantity': -1, 'average_price': 1, 'weight': 10, 'tag': 'Ações'}, 'Quantity must be zero or greater.'),
+    ({'ticker': 'A', 'quantity': 1, 'average_price': -1, 'weight': 10, 'tag': 'Ações'}, 'Average price must be zero or greater.'),
+    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'weight': 101, 'tag': 'Ações'}, 'Weight must be between 0 and 100.'),
+    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'weight': 10, 'tag': ''}, 'Category is required.'),
+    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'weight': 10, 'tag': 'Ações', 'manual_price': -1}, 'Manual price must be zero or greater.'),
 ])
 def test_validate_asset_payload_errors(payload, error_message):
     with pytest.raises(ValidationError, match=error_message):

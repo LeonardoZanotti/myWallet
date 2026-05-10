@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ticker: document.getElementById('add-ticker').value.toUpperCase(),
             quantity: parseLocalizedNumber(document.getElementById('add-qty').value),
             average_price: parseLocalizedNumber(document.getElementById('add-price').value),
-            nota: parseInt(document.getElementById('add-nota').value),
+            weight: parseInt(document.getElementById('add-weight').value),
             tag: document.getElementById('add-tag').value
         };
         
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = {
             quantity: parseLocalizedNumber(document.getElementById('edit-qty').value),
             average_price: parseLocalizedNumber(document.getElementById('edit-price').value),
-            nota: parseInt(document.getElementById('edit-nota').value),
+            weight: parseInt(document.getElementById('edit-weight').value),
             tag: document.getElementById('edit-tag').value
         };
         
@@ -143,14 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function openEditModal(ticker, qty, price, nota, tag) {
+function openEditModal(ticker, qty, price, weight, tag) {
     const decodedTicker = decodeURIComponent(ticker);
     const decodedTag = decodeURIComponent(tag);
     document.getElementById('edit-ticker').value = decodedTicker;
     document.getElementById('edit-ticker-display').innerText = decodedTicker;
     document.getElementById('edit-qty').value = qty;
     document.getElementById('edit-price').value = price;
-    document.getElementById('edit-nota').value = nota;
+    document.getElementById('edit-weight').value = weight;
     document.getElementById('edit-tag').value = decodedTag;
     
     const modal = document.getElementById('edit-modal');
@@ -313,7 +313,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
                             <th class="py-3 px-6">Current</th>
                             <th class="py-3 px-6">Variation</th>
                             <th class="py-3 px-6">Value</th>
-                            <th class="py-3 px-6 text-center cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('nota')">Weight ${sortIcon('nota')}</th>
+                            <th class="py-3 px-6 text-center cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('weight')">Weight ${sortIcon('weight')}</th>
                             <th class="py-3 px-6 text-right cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('pctInGroup')">% Group ${sortIcon('pctInGroup')}</th>
                             <th class="py-3 px-6 text-right whitespace-nowrap">% Wallet</th>
                             <th class="py-3 px-6 text-right sticky right-0 z-10 sticky-col-header bg-dark-bg/30">Actions</th>
@@ -322,7 +322,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
                     <tbody class="text-sm divide-y divide-dark-border">
         `;
         
-        let totalGroupNota = groupAssets.reduce((sum, a) => sum + a.nota, 0);
+        let totalGroupWeight = groupAssets.reduce((sum, a) => sum + a.weight, 0);
         
         groupAssets.forEach(a => {
             a.pctInGroup = groupTotal > 0 ? (a.total_value / groupTotal) * 100 : 0;
@@ -347,7 +347,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
             const priceText = a.current_price !== null && a.current_price !== undefined ? formatCurrency(a.current_price, a.currency) : '<span class="text-dark-muted">N/A</span>';
             
             const pctInGroup = groupTotal > 0 ? (a.total_value / groupTotal) * 100 : 0;
-            const targetPctInGroup = totalGroupNota > 0 ? (a.nota / totalGroupNota) * 100 : 0;
+            const targetPctInGroup = totalGroupWeight > 0 ? (a.weight / totalGroupWeight) * 100 : 0;
             const aUnifiedValue = a.total_value * (a.currency === 'USD' ? exchangeRate : 1.0);
             const aPctInWallet = totalPatrimonyUnified > 0 ? (aUnifiedValue / totalPatrimonyUnified) * 100 : 0;
             
@@ -369,11 +369,11 @@ function renderWallet(assets, exchangeRate = 5.0) {
                     </span>
                 </td>
                 <td class="py-3 px-6 font-medium">${formatCurrency(a.total_value, a.currency)}</td>
-                <td class="py-3 px-6 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.nota}</span></td>
+                <td class="py-3 px-6 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.weight}</span></td>
                 <td class="py-3 px-6 text-right font-medium text-white">${a.pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
                 <td class="py-3 px-6 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInWallet.toFixed(1)}%</span></td>
                 <td class="py-3 px-6 text-right sticky right-0 z-10 sticky-col-cell">
-                    <button onclick="openEditModal('${encodeURIComponent(a.ticker)}', ${a.quantity}, ${a.average_price}, ${a.nota}, '${encodeURIComponent(a.tag)}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="openEditModal('${encodeURIComponent(a.ticker)}', ${a.quantity}, ${a.average_price}, ${a.weight}, '${encodeURIComponent(a.tag)}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="deleteAsset('${encodeURIComponent(a.ticker)}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>

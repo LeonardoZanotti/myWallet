@@ -148,3 +148,27 @@ def test_smart_buy_modal_opens_for_real(browser, frontend_env):
         body_text = browser.find_element(By.ID, "recommendation-body").text
         assert "PETR4.SA" in body_text
         assert "VOO" in body_text
+
+
+def test_investment_history_tab_shows_ledger(browser, frontend_env):
+    frontend_env.write_text(json.dumps({
+        "assets": [
+            {"ticker": "VOO", "weight": 100, "tag": "US ETFs"}
+        ],
+        "groups": {"US ETFs": {"target_percent": 100}},
+        "transactions": [
+            {"id": "1", "ticker": "VOO", "tag": "US ETFs", "type": "BUY", "quantity": 1.5, "price": 100, "amount": 150, "currency": "USD", "date": "2026-04-20"}
+        ]
+    }, ensure_ascii=False), encoding="utf-8")
+
+    with live_server(backend_app.app) as url:
+        browser.get(url)
+        wait_for_text(browser, By.ID, "asset-groups-container", "VOO")
+
+        browser.find_element(By.ID, "tab-transactions").click()
+
+        WebDriverWait(browser, 10).until(
+            EC.visibility_of_element_located((By.ID, "transactions-view"))
+        )
+        wait_for_text(browser, By.ID, "transactions-body", "VOO")
+        wait_for_text(browser, By.ID, "monthly-history-body", "04/2026")

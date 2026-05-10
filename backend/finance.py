@@ -1,5 +1,9 @@
 import yfinance as yf
 
+try:
+    from .config import BRL_CATEGORIES
+except ImportError:  # pragma: no cover
+    from config import BRL_CATEGORIES
 def get_current_prices(assets):
     """
     Fetches the current market price for a list of assets.
@@ -9,15 +13,13 @@ def get_current_prices(assets):
         return {}
         
     prices = {}
-    brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs', 'BR ETF']
-    
     try:
         for asset in assets:
             ticker = asset['ticker']
             tag = asset.get('tag', '')
             
             query_ticker = ticker
-            if tag in brl_categories and not ticker.endswith('.SA'):
+            if tag in BRL_CATEGORIES and not ticker.endswith('.SA'):
                 query_ticker = ticker + '.SA'
                 
             ticker_obj = yf.Ticker(query_ticker)

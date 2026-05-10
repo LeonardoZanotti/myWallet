@@ -6,16 +6,16 @@ try:
     from .finance import get_current_prices, get_exchange_rate
     from .calculator import calculate_smart_buy
     from .validation import ValidationError, validate_asset_payload, validate_group_payload, validate_investment_payload
+    from .config import BRL_CATEGORIES
 except ImportError:  # pragma: no cover
     from wallet import load_wallet, add_asset, update_asset, remove_asset, update_group
     from finance import get_current_prices, get_exchange_rate
     from calculator import calculate_smart_buy
     from validation import ValidationError, validate_asset_payload, validate_group_payload, validate_investment_payload
+    from config import BRL_CATEGORIES
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 CORS(app)
-
-BRL_CATEGORIES = ['BDR', 'FII', 'Ações', 'BR ETFs', 'BR ETF']
 
 
 def json_error(message, status_code=400):

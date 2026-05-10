@@ -99,11 +99,4 @@ def validate_investment_payload(data):
     return {'invest_brl': invest_brl, 'invest_usd': invest_usd}
 
 
-def validate_csv_import_payload(data):
-    data = _require_mapping(data)
-    csv_text = data.get('csv_text')
-    if not isinstance(csv_text, str) or not csv_text.strip():
-        raise ValidationError('csv_text is required.')
 
-    replace_existing = bool(data.get('replace_existing', False))
-    return {'csv_text': csv_text, 'replace_existing': replace_existing}

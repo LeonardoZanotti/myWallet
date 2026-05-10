@@ -1,6 +1,27 @@
 let portfolioChartInstance = null;
 let walletGroups = {};
 let currentExchangeRate = 5.0;
+let globalAssets = [];
+let currentSort = { column: 'pctInGroup', direction: 'desc' };
+
+function setSort(column) {
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = 'desc';
+    }
+    if (globalAssets.length > 0) {
+        renderWallet(globalAssets, currentExchangeRate);
+    }
+}
+
+function sortIcon(column) {
+    if (currentSort.column !== column) return '<i class="fa-solid fa-sort ml-1 opacity-40"></i>';
+    return currentSort.direction === 'asc' 
+        ? '<i class="fa-solid fa-sort-up ml-1 text-brand-blue"></i>' 
+        : '<i class="fa-solid fa-sort-down ml-1 text-brand-blue"></i>';
+}
 
 function showFeedback(message, type = 'error') {
     const feedback = document.getElementById('app-feedback');
@@ -187,7 +208,8 @@ async function fetchWallet() {
         clearFeedback();
         walletGroups = data.groups || {};
         currentExchangeRate = data.exchange_rate || 5.0;
-        renderWallet(data.assets, data.exchange_rate);
+        globalAssets = data.assets || [];
+        renderWallet(globalAssets, currentExchangeRate);
     } catch (error) {
         console.error("Error fetching wallet", error);
         showFeedback('Error fetching wallet');
@@ -285,22 +307,40 @@ function renderWallet(assets, exchangeRate = 5.0) {
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-dark-muted text-xs uppercase tracking-wider border-b border-dark-border bg-dark-bg/10">
-                            <th class="py-3 px-6">Asset</th>
+                            <th class="py-3 px-6 cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('ticker')">Asset ${sortIcon('ticker')}</th>
                             <th class="py-3 px-6">Qty</th>
                             <th class="py-3 px-6">Avg Price</th>
                             <th class="py-3 px-6">Current</th>
                             <th class="py-3 px-6">Variation</th>
                             <th class="py-3 px-6">Value</th>
-                            <th class="py-3 px-6 text-center">Weight</th>
-                            <th class="py-3 px-6 text-right">% Group</th>
-                            <th class="py-3 px-6 text-right">% Wallet</th>
-                            <th class="py-3 px-6 text-right">Actions</th>
+                            <th class="py-3 px-6 text-center cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('nota')">Weight ${sortIcon('nota')}</th>
+                            <th class="py-3 px-6 text-right cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('pctInGroup')">% Group ${sortIcon('pctInGroup')}</th>
+                            <th class="py-3 px-6 text-right whitespace-nowrap">% Wallet</th>
+                            <th class="py-3 px-6 text-right sticky right-0 z-10 sticky-col-header bg-dark-bg/30">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm divide-y divide-dark-border">
         `;
         
         let totalGroupNota = groupAssets.reduce((sum, a) => sum + a.nota, 0);
+        
+        groupAssets.forEach(a => {
+            a.pctInGroup = groupTotal > 0 ? (a.total_value / groupTotal) * 100 : 0;
+        });
+
+        groupAssets.sort((a, b) => {
+            let valA = a[currentSort.column];
+            let valB = b[currentSort.column];
+            
+            if (currentSort.column === 'ticker') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+            
+            if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+            if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
         
         groupAssets.forEach(a => {
             const isPositive = a.variation >= 0;
@@ -330,9 +370,9 @@ function renderWallet(assets, exchangeRate = 5.0) {
                 </td>
                 <td class="py-3 px-6 font-medium">${formatCurrency(a.total_value, a.currency)}</td>
                 <td class="py-3 px-6 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.nota}</span></td>
-                <td class="py-3 px-6 text-right font-medium text-white">${pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
+                <td class="py-3 px-6 text-right font-medium text-white">${a.pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
                 <td class="py-3 px-6 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInWallet.toFixed(1)}%</span></td>
-                <td class="py-3 px-6 text-right">
+                <td class="py-3 px-6 text-right sticky right-0 z-10 sticky-col-cell">
                     <button onclick="openEditModal('${encodeURIComponent(a.ticker)}', ${a.quantity}, ${a.average_price}, ${a.nota}, '${encodeURIComponent(a.tag)}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="deleteAsset('${encodeURIComponent(a.ticker)}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
                 </td>

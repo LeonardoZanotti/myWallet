@@ -1,5 +1,9 @@
 import math
 
+try:
+    from .config import BRL_CATEGORIES
+except ImportError:  # pragma: no cover
+    from config import BRL_CATEGORIES
 def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0, groups_config=None, exchange_rate=5.0):
     if groups_config is None:
         groups_config = {}
@@ -16,10 +20,9 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0, 
         asset_copy['current_price'] = price
         asset_copy['current_value_native'] = asset_copy['quantity'] * price
         
-        brl_categories = ['BDR', 'FII', 'Ações', 'BR ETFs', 'BR ETF']
         tag = asset_copy.get('tag', 'Outros')
         
-        is_brl = tag in brl_categories or ticker.endswith('.SA')
+        is_brl = tag in BRL_CATEGORIES or ticker.endswith('.SA')
         asset_copy['currency'] = 'BRL' if is_brl else 'USD'
         
         asset_copy['current_value_brl'] = asset_copy['current_value_native'] if is_brl else asset_copy['current_value_native'] * exchange_rate

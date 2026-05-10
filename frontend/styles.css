@@ -36,6 +36,20 @@ body {
 .asset-row:hover {
     background-color: rgba(30, 41, 59, 0.8);
 }
+.asset-row:hover .sticky-col-cell {
+    background-color: rgba(30, 41, 59, 1); /* Opaque match for hover */
+}
+
+/* Sticky Action Column Styles */
+.sticky-col-header {
+    background-color: rgba(15, 23, 42, 0.95); /* Matches header bg slightly */
+    box-shadow: -4px 0 6px -4px rgba(0, 0, 0, 0.3);
+}
+.sticky-col-cell {
+    background-color: #1e293b; /* Base card color */
+    box-shadow: -4px 0 6px -4px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s ease;
+}
 
 .variation-positive {
     color: #10b981;

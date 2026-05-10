@@ -322,6 +322,16 @@ The smart-buy logic lives in `backend/calculator.py`.
 
 It runs in five stages.
 
+```mermaid
+flowchart TD
+    A[Start Smart Buy] --> B[Stage 1: Prepare Asset Values & Groups]
+    B --> C[Stage 2: Compute Ideal Group Values]
+    C --> D[Stage 3: Split Cash by Currency Bucket]
+    D --> E[Stage 4: Split Group Allocations across Assets]
+    E --> F[Stage 5: Convert Allocations into Orders]
+    F --> G[Return Recommendations & Leftover Cash]
+```
+
 ### Stage 1: prepare asset values
 
 For each asset:

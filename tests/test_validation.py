@@ -7,7 +7,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../'
 from backend.validation import (
     ValidationError,
     validate_asset_payload,
-    validate_csv_import_payload,
     validate_group_payload,
     validate_investment_payload,
 )
@@ -73,11 +72,4 @@ def test_validate_investment_payload():
         validate_investment_payload({'invest_brl': 'nope', 'invest_usd': 0})
 
 
-def test_validate_csv_import_payload():
-    assert validate_csv_import_payload({'csv_text': 'ticker\nVOO', 'replace_existing': 1}) == {
-        'csv_text': 'ticker\nVOO',
-        'replace_existing': True
-    }
 
-    with pytest.raises(ValidationError, match='csv_text is required.'):
-        validate_csv_import_payload({'csv_text': '   '})

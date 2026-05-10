@@ -79,6 +79,8 @@ def test_remove_asset(mock_wallet_file):
     loaded = wallet.load_wallet()
     assert len(loaded['assets']) == 0
 
+    assert wallet.remove_asset('B.SA') == False
+
 def test_update_group(mock_wallet_file):
     wallet.save_wallet({"assets": [], "groups": {}})
     updated = wallet.update_group("Ações", {"target_percent": 30})

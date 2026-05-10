@@ -90,4 +90,4 @@ That last point means the final smart-buy result can be close to, but not always
 
 ## Wiki
 
-The full calculation guide lives at [wiki/README.md](/home/lzanotti/Documents/projects/myWallet/wiki/README.md).
+The full calculation guide lives at [wiki/README.md](wiki/README.md).

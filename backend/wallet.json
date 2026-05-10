@@ -2,50 +2,50 @@
     "assets": [
         {
             "ticker": "IVV",
-            "quantity": 0.17553714,
-            "average_price": 712.1,
+            "quantity": 0.40274378,
+            "average_price": 716.39,
             "nota": 30,
             "tag": "US ETFs"
         },
         {
             "ticker": "VT",
-            "quantity": 1.10843614,
-            "average_price": 150.37,
+            "quantity": 2.82213075,
+            "average_price": 150.05,
             "nota": 40,
             "tag": "US ETFs"
         },
         {
             "ticker": "QQQ",
-            "quantity": 0.19327107,
-            "average_price": 646.78,
+            "quantity": 0.30372505,
+            "average_price": 650.76,
             "nota": 20,
             "tag": "US ETFs"
         },
         {
             "ticker": "IBIT",
-            "quantity": 1.17315814,
-            "average_price": 42.62,
+            "quantity": 2.25652038,
+            "average_price": 42.92,
             "nota": 10,
             "tag": "US ETFs"
         },
         {
             "ticker": "AUVP11",
-            "quantity": 21,
-            "average_price": 135,
+            "quantity": 30.0,
+            "average_price": 133.43,
             "nota": 38,
             "tag": "BR ETFs"
         },
         {
             "ticker": "AUPO11",
-            "quantity": 13,
-            "average_price": 103.87,
+            "quantity": 18.0,
+            "average_price": 104.23,
             "nota": 38,
             "tag": "BR ETFs"
         },
         {
             "ticker": "NTNS11",
-            "quantity": 12,
-            "average_price": 63.7,
+            "quantity": 17.0,
+            "average_price": 64.06,
             "nota": 25,
             "tag": "BR ETFs"
         },
@@ -58,15 +58,15 @@
         },
         {
             "ticker": "HGLG11",
-            "quantity": 1,
-            "average_price": 157.75,
+            "quantity": 2.0,
+            "average_price": 157.03,
             "nota": 10,
             "tag": "FII"
         },
         {
             "ticker": "XPML11",
-            "quantity": 1,
-            "average_price": 111.89,
+            "quantity": 2.0,
+            "average_price": 111.27,
             "nota": 10,
             "tag": "FII"
         },
@@ -93,15 +93,15 @@
         },
         {
             "ticker": "KNCA11",
-            "quantity": 1,
-            "average_price": 98.35,
+            "quantity": 2.0,
+            "average_price": 96.94,
             "nota": 10,
             "tag": "FII"
         },
         {
             "ticker": "TRXF11",
-            "quantity": 1,
-            "average_price": 93.07,
+            "quantity": 2.0,
+            "average_price": 92.45,
             "nota": 10,
             "tag": "FII"
         },
@@ -114,14 +114,14 @@
         },
         {
             "ticker": "KNSC11",
-            "quantity": 4,
-            "average_price": 9.11,
+            "quantity": 14.0,
+            "average_price": 9.21,
             "nota": 10,
             "tag": "FII"
         }
     ],
     "groups": {
-        "A\u00c3\u00a7\u00c3\u00b5es": {
+        "AÃ§Ãµes": {
             "target_percent": 30
         },
         "US ETFs": {

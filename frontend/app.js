@@ -369,6 +369,16 @@ function switchTab(tabId) {
     }
 }
 
+function focusInvestmentForm() {
+    const card = document.getElementById('investment-form-card');
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const firstTicker = card.querySelector('[data-field="ticker"]');
+    if (firstTicker) {
+        setTimeout(() => firstTicker.focus(), 350);
+    }
+}
+
 function showLoader() {
     const l = document.getElementById('global-loader');
     l.classList.remove('hidden');
@@ -430,7 +440,7 @@ function renderTransactions(transactions) {
                 <td class="py-3 px-6 font-medium">${tx.ticker}</td>
                 <td class="py-3 px-6 text-dark-muted">${asset ? asset.tag : (tx.tag || '-')}</td>
                 <td class="py-3 px-6">${currency}</td>
-                <td class="py-3 px-6 text-right">${tx.quantity}</td>
+                <td class="py-3 px-6 text-right">${formatQuantity(tx.quantity)}</td>
                 <td class="py-3 px-6 text-right">${formatCurrency(tx.price, currency)}</td>
                 <td class="py-3 px-6 text-right">${formatCurrency(total, currency)}</td>
                 <td class="py-3 px-6 text-right">
@@ -758,7 +768,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
             html += `
             <tr class="asset-row">
                 <td class="py-3 px-3 font-medium">${a.ticker}</td>
-                <td class="py-3 px-3">${a.quantity}</td>
+                <td class="py-3 px-3">${formatQuantity(a.quantity)}</td>
                 <td class="py-3 px-3">${formatCurrency(a.average_price, a.currency)}</td>
                 <td class="py-3 px-3">${priceText}</td>
                 <td class="py-3 px-3">
@@ -919,6 +929,14 @@ function formatCurrency(val, currency = 'BRL') {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
     }
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+}
+
+function formatQuantity(value) {
+    const number = Number(value || 0);
+    if (Number.isInteger(number)) {
+        return String(number);
+    }
+    return number.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
 }
 
 function assetCurrency(ticker) {

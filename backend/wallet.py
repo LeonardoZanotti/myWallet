@@ -6,6 +6,7 @@ import datetime
 from backend.config import BRL_CATEGORIES
 
 WALLET_FILE = os.path.join(os.path.dirname(__file__), 'wallet.json')
+EPSILON = 1e-9
 
 def _empty_wallet():
     return {"assets": [], "groups": {}, "transactions": []}
@@ -49,6 +50,13 @@ def _recalculate_all_asset_states(wallet):
     tickers.update(tx.get('ticker') for tx in wallet.get('transactions', []))
     for ticker in sorted(t for t in tickers if t):
         recalculate_asset_state(ticker, wallet)
+
+def _prune_sold_assets(wallet):
+    tx_tickers = {tx.get('ticker') for tx in wallet.get('transactions', [])}
+    wallet['assets'] = [
+        asset for asset in wallet.get('assets', [])
+        if asset.get('ticker') not in tx_tickers or abs(float(asset.get('quantity', 0) or 0)) > EPSILON
+    ]
 
 def load_wallet():
     if not os.path.exists(WALLET_FILE):
@@ -104,6 +112,7 @@ def load_wallet():
                     assets_by_ticker[tx['ticker']] = asset
 
             _recalculate_all_asset_states(data)
+            _prune_sold_assets(data)
                 
             if needs_save or json.dumps(data, sort_keys=True) != original:
                 save_wallet(data)
@@ -136,7 +145,8 @@ def recalculate_asset_state(ticker, wallet):
                 qty = 0.0
                 total_cost = 0.0
                 
-    avg_price = (total_cost / qty) if qty > 0 else 0.0
+    qty = round(qty, 8)
+    avg_price = round((total_cost / qty), 8) if qty > 0 else 0.0
     
     for asset in wallet['assets']:
         if asset['ticker'] == ticker:
@@ -170,6 +180,7 @@ def add_transaction(tx_data):
         })
         
     recalculate_asset_state(tx_data['ticker'], wallet)
+    _prune_sold_assets(wallet)
     save_wallet(wallet)
     return tx_data
 
@@ -181,6 +192,7 @@ def remove_transaction(tx_id):
         
     wallet['transactions'] = [tx for tx in wallet['transactions'] if tx['id'] != tx_id]
     recalculate_asset_state(tx_to_remove['ticker'], wallet)
+    _prune_sold_assets(wallet)
     save_wallet(wallet)
     return True
 

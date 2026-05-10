@@ -200,8 +200,11 @@
 
         <!-- TRANSACTIONS VIEW -->
         <div id="transactions-view" class="hidden space-y-8">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
                 <h2 class="text-2xl font-bold">Investment History</h2>
+                <button onclick="focusInvestmentForm()" class="bg-brand-green hover:bg-brand-greenHover text-white font-medium py-2 px-5 rounded-lg transition-colors inline-flex items-center justify-center">
+                    <i class="fa-solid fa-plus mr-2"></i> Add Investment
+                </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -223,10 +226,10 @@
                 </div>
             </div>
 
-            <div class="bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg">
+            <div id="investment-form-card" class="bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg">
                 <div class="flex items-center justify-between gap-4 mb-5">
                     <h3 class="text-lg font-bold flex items-center">
-                        <i class="fa-solid fa-calendar-plus text-brand-green mr-2"></i> Monthly Contribution Release
+                        <i class="fa-solid fa-calendar-plus text-brand-green mr-2"></i> New Investment Release
                     </h3>
                     <div class="w-44">
                         <label class="text-dark-muted text-xs font-medium mb-1 block">Release Date</label>
@@ -240,7 +243,7 @@
                             <i class="fa-solid fa-plus mr-2"></i> Add Line
                         </button>
                         <button type="submit" class="bg-brand-green hover:bg-brand-greenHover text-white font-medium py-2 px-5 rounded-lg transition-colors inline-flex items-center justify-center">
-                            <i class="fa-solid fa-floppy-disk mr-2"></i> Save Release
+                            <i class="fa-solid fa-floppy-disk mr-2"></i> Save Investment
                         </button>
                     </div>
                 </form>
@@ -444,7 +447,7 @@
                     <div class="flex space-x-4">
                         <div class="flex-1">
                             <label class="text-dark-muted text-xs font-medium mb-1 block">Quantity</label>
-                            <input type="text" inputmode="decimal" id="tx-qty" required class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+                            <input type="text" inputmode="decimal" id="tx-qty" placeholder="auto from amount" class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
                         </div>
                         <div class="flex-1">
                             <label class="text-dark-muted text-xs font-medium mb-1 block">Price</label>
@@ -477,6 +480,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>

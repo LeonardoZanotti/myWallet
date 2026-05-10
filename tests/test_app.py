@@ -28,7 +28,8 @@ def test_get_wallet(mock_exchange, mock_prices, mock_load, client):
         "assets": [
             {'ticker': 'A.SA', 'quantity': 10, 'average_price': 10, 'tag': 'Ações'},
             {'ticker': 'VOO', 'quantity': 5, 'average_price': 100, 'tag': 'US ETFs'},
-            {'ticker': 'B.SA', 'quantity': 5, 'average_price': 10, 'tag': 'Ações'} # no price found
+            {'ticker': 'B.SA', 'quantity': 5, 'average_price': 10, 'tag': 'Ações'}, # no price found
+            {'ticker': 'OLD.SA', 'quantity': 0, 'average_price': 0, 'tag': 'Ações'}
         ]
     }
     mock_prices.return_value = {'A.SA': 20, 'VOO': 110, 'B.SA': None}
@@ -39,6 +40,7 @@ def test_get_wallet(mock_exchange, mock_prices, mock_load, client):
     data = response.get_json()
     assert data['exchange_rate'] == 5.0
     assert len(data['assets']) == 3
+    assert [asset['ticker'] for asset in data['assets']] == ['A.SA', 'VOO', 'B.SA']
     
     assert data['assets'][0]['currency'] == 'BRL'
     assert data['assets'][0]['current_price'] == 20

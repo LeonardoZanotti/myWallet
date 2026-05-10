@@ -1,743 +1,733 @@
 {
     "assets": [
         {
-            "ticker": "AUVP11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 30.0,
-            "average_price": 133.41433333333333
-        },
-        {
-            "ticker": "BIEU39",
-            "weight": 10,
-            "tag": "BDR",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "KNSC11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 14.0,
-            "average_price": 9.209999999999999
-        },
-        {
-            "ticker": "PVBI11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 1.0,
-            "average_price": 77.55
-        },
-        {
-            "ticker": "KNCA11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 2.0,
-            "average_price": 96.935
-        },
-        {
-            "ticker": "KNCR11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 1.0,
-            "average_price": 106.79
-        },
-        {
-            "ticker": "KNRI11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 1.0,
-            "average_price": 165.8
-        },
-        {
-            "ticker": "TRXF11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 2.0,
-            "average_price": 92.44999999999999
-        },
-        {
-            "ticker": "VISC11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 1.0,
-            "average_price": 110.82
-        },
-        {
-            "ticker": "XPML11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 2.0,
-            "average_price": 111.265
-        },
-        {
-            "ticker": "BTLG11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 1.0,
-            "average_price": 102.91
-        },
-        {
-            "ticker": "HGLG11",
-            "weight": 10,
-            "tag": "FII",
-            "quantity": 2.0,
-            "average_price": 157.025
-        },
-        {
-            "ticker": "DUOL34",
-            "weight": 10,
-            "tag": "BDR",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "M1NS34",
-            "weight": 10,
-            "tag": "BDR",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "TMCO34",
-            "weight": 10,
-            "tag": "BDR",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "ROXO34",
-            "weight": 10,
-            "tag": "BDR",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "CRPT11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "HODL11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "NASD11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "IVVB11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "WRLD11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 0.0,
-            "average_price": 0.0
-        },
-        {
-            "ticker": "NTNS11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 17.0,
-            "average_price": 64.05411764705883
-        },
-        {
-            "ticker": "AUPO11",
-            "weight": 10,
-            "tag": "BR ETFs",
-            "quantity": 18.0,
-            "average_price": 104.21388888888889
-        },
-        {
-            "ticker": "RVLV",
-            "weight": 10,
-            "tag": "Stocks",
-            "quantity": 0.0,
-            "average_price": 0.0
+            "ticker": "IVV",
+            "quantity": 0.40274378,
+            "average_price": 716.39,
+            "weight": 30,
+            "tag": "US ETFs"
         },
         {
             "ticker": "VT",
-            "weight": 10,
-            "tag": "US ETFs",
-            "quantity": 2.8200000000000003,
-            "average_price": 150.04861702127658
-        },
-        {
-            "ticker": "IVV",
-            "weight": 10,
-            "tag": "US ETFs",
-            "quantity": 0.41000000000000003,
-            "average_price": 716.3634146341462
+            "quantity": 2.82213075,
+            "average_price": 150.05,
+            "weight": 40,
+            "tag": "US ETFs"
         },
         {
             "ticker": "QQQ",
-            "weight": 10,
-            "tag": "US ETFs",
-            "quantity": 0.3,
-            "average_price": 650.7913333333333
+            "quantity": 0.30372505,
+            "average_price": 650.76,
+            "weight": 20,
+            "tag": "US ETFs"
         },
         {
             "ticker": "IBIT",
+            "quantity": 2.25652038,
+            "average_price": 42.92,
             "weight": 10,
-            "tag": "US ETFs",
-            "quantity": 2.25,
-            "average_price": 42.9176
-        }
-    ],
-    "groups": {},
-    "transactions": [
-        {
-            "ticker": "AUVP11",
-            "type": "BUY",
-            "quantity": 10.0,
-            "price": 134.95,
-            "date": "2026-04-20",
-            "id": "5fc787c0-3085-4aae-9f28-816675c74610",
-            "amount": 1349.5,
-            "currency": "BRL"
+            "tag": "US ETFs"
         },
         {
-            "ticker": "BIEU39",
-            "type": "BUY",
+            "ticker": "AUVP11",
+            "quantity": 30.0,
+            "average_price": 133.43,
+            "weight": 38,
+            "tag": "BR ETFs"
+        },
+        {
+            "ticker": "AUPO11",
+            "quantity": 18.0,
+            "average_price": 104.23,
+            "weight": 38,
+            "tag": "BR ETFs"
+        },
+        {
+            "ticker": "NTNS11",
+            "quantity": 17.0,
+            "average_price": 64.06,
+            "weight": 25,
+            "tag": "BR ETFs"
+        },
+        {
+            "ticker": "KNRI11",
             "quantity": 1.0,
-            "price": 65.82,
-            "date": "2026-02-27",
-            "id": "019ef191-d08c-44b2-b645-156682c144fb",
-            "amount": 65.82,
-            "currency": "BRL"
+            "average_price": 165.8,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "HGLG11",
+            "quantity": 2.0,
+            "average_price": 157.03,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "XPML11",
+            "quantity": 2.0,
+            "average_price": 111.27,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "VISC11",
+            "quantity": 1.0,
+            "average_price": 110.82,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "KNCR11",
+            "quantity": 1.0,
+            "average_price": 106.79,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "BTLG11",
+            "quantity": 1.0,
+            "average_price": 102.91,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "KNCA11",
+            "quantity": 2.0,
+            "average_price": 96.94,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "TRXF11",
+            "quantity": 2.0,
+            "average_price": 92.45,
+            "weight": 10,
+            "tag": "FII"
+        },
+        {
+            "ticker": "PVBI11",
+            "quantity": 1.0,
+            "average_price": 77.55,
+            "weight": 10,
+            "tag": "FII"
         },
         {
             "ticker": "KNSC11",
+            "quantity": 14.0,
+            "average_price": 9.21,
+            "weight": 10,
+            "tag": "FII"
+        }
+    ],
+    "groups": {
+        "Ações": {
+            "target_percent": 30
+        },
+        "US ETFs": {
+            "target_percent": 50
+        },
+        "BR ETFs": {
+            "target_percent": 40
+        },
+        "FII": {
+            "target_percent": 10
+        }
+    },
+    "transactions": [
+        {
+            "id": "5ed95bd8-ef2c-5c84-b4bf-8d050437f29f",
+            "ticker": "KNSC11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 4.0,
             "price": 9.11,
-            "date": "2026-02-25",
-            "id": "776d2ad9-1d4e-4439-86dc-0f50aad54135",
             "amount": 36.44,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "2cfd1731-9250-5890-92d4-361fe9cf276f",
             "ticker": "PVBI11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 77.55,
-            "date": "2026-02-25",
-            "id": "b21ad1f7-4f86-4669-99a0-09185c7df71b",
             "amount": 77.55,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "80d8ebb6-39f2-52fa-a9fd-50a5d7b8dbe7",
             "ticker": "KNCA11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 98.35,
-            "date": "2026-02-25",
-            "id": "1abaf88e-b34f-4df0-8b3e-789d61b3857d",
             "amount": 98.35,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "a8bc1ccd-0a8b-5944-93d3-ce005e675fc5",
             "ticker": "KNCR11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 106.79,
-            "date": "2026-02-25",
-            "id": "b91a8f37-9911-4847-aa10-78a43c493978",
             "amount": 106.79,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "3940f28c-1048-5789-b550-3d01b69632d1",
             "ticker": "KNRI11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 165.8,
-            "date": "2026-02-25",
-            "id": "70cf4822-e832-4141-9246-8d044d0a03dc",
             "amount": 165.8,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "658cd9e5-b56d-50f1-bb44-1e3ee6b21e6c",
             "ticker": "TRXF11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 93.07,
-            "date": "2026-02-25",
-            "id": "cec02125-a199-48f7-8448-b0e96b131cdd",
             "amount": 93.07,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "ebe80d6f-5b5f-5592-8a94-aba6f683031e",
             "ticker": "VISC11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 110.82,
-            "date": "2026-02-25",
-            "id": "5ea81e45-a52d-4b94-bf5f-aa7c47002870",
             "amount": 110.82,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "bba12b57-e812-5e71-bdec-d1aedbddec90",
             "ticker": "XPML11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 111.89,
-            "date": "2026-02-25",
-            "id": "99c668e6-0a9c-4d8b-b616-22a3d46f48af",
             "amount": 111.89,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "006ec76f-a0c4-56ee-950f-5088705141ca",
             "ticker": "BTLG11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 102.91,
-            "date": "2026-02-25",
-            "id": "d6f85c22-4d35-4c09-80ff-f140d7262680",
             "amount": 102.91,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "beadf50e-00c2-55e8-a57a-ffcd235c00e9",
             "ticker": "HGLG11",
+            "tag": "FII",
             "type": "BUY",
             "quantity": 1.0,
             "price": 157.75,
-            "date": "2026-02-25",
-            "id": "b96c558e-9c76-470e-99df-84f29393a385",
             "amount": 157.75,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "1bc9a06d-367b-5e74-8fd5-2e910526b492",
             "ticker": "DUOL34",
+            "tag": "BDR",
             "type": "BUY",
             "quantity": 2.0,
             "price": 18.2,
-            "date": "2026-02-25",
-            "id": "99117d5f-dc78-458c-a606-aeb9a931371e",
             "amount": 36.4,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "9c5dcfd1-646b-5a2f-9ff9-8c4a292a35ea",
             "ticker": "M1NS34",
+            "tag": "BDR",
             "type": "BUY",
             "quantity": 1.0,
             "price": 52.18,
-            "date": "2026-02-25",
-            "id": "e6704976-3596-4a83-adca-a410cf6c0cb3",
             "amount": 52.18,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "4cbdb3a4-2336-5cd6-9050-ce7e2174b547",
             "ticker": "TMCO34",
+            "tag": "BDR",
             "type": "BUY",
             "quantity": 1.0,
             "price": 78.0,
-            "date": "2026-02-25",
-            "id": "ddc60718-f2e8-4dee-bd26-ad66ed8faa38",
             "amount": 78.0,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "28391c00-d3d6-5279-9305-b1ce791d7dc0",
             "ticker": "ROXO34",
+            "tag": "BDR",
             "type": "BUY",
             "quantity": 4.0,
             "price": 13.44,
-            "date": "2026-02-25",
-            "id": "4fa0c3ad-571d-4ba0-b7a7-a651791f5437",
             "amount": 53.76,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "cd194ee4-0517-5532-b091-f8fb4b934cf6",
             "ticker": "CRPT11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 6.0,
             "price": 12.42,
-            "date": "2026-02-25",
-            "id": "f78cc3df-3004-48a4-bc00-1653dbb8e947",
             "amount": 74.52,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "be4cebbc-334e-590f-8cfa-7c7389f32f25",
             "ticker": "HODL11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 1.0,
             "price": 59.63,
-            "date": "2026-02-25",
-            "id": "6cafcd3a-afe4-4f73-898e-0149b7620399",
             "amount": 59.63,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "cd95c7c0-d530-5f3e-96e9-a4663d4dad23",
             "ticker": "NASD11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 16.0,
             "price": 18.19,
-            "date": "2026-02-25",
-            "id": "14eff75c-343e-4c21-9240-2bafdd546bcf",
             "amount": 291.04,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "c07b18c2-532a-56f6-a3f4-9e98d9be538b",
             "ticker": "IVVB11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 1.0,
             "price": 400.9,
-            "date": "2026-02-25",
-            "id": "d826ba4e-5dbc-42c9-b0d7-d5c95da9dfd1",
             "amount": 400.9,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "4bd34e5c-39bf-5f3a-a459-6419a4287ab6",
             "ticker": "WRLD11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 3.0,
             "price": 138.4,
-            "date": "2026-02-25",
-            "id": "41a2f0e4-71a5-454f-889d-124f7d64b5d9",
             "amount": 415.20000000000005,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "02bcefd9-3dbc-5975-9f2c-c1dec0dd9053",
             "ticker": "AUVP11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 11.0,
             "price": 135.0,
-            "date": "2026-02-25",
-            "id": "10d64d80-3d20-423a-92ce-1693e9c82c1e",
             "amount": 1485.0,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "d49a4195-2875-5509-ac26-129d7f1a7288",
             "ticker": "NTNS11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 7.0,
             "price": 63.06,
-            "date": "2026-02-25",
-            "id": "bf1e2617-c680-4bcd-bb38-483c166f5b92",
             "amount": 441.42,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
+            "id": "8265a6ca-7d67-5ccb-b813-410e026fefde",
             "ticker": "AUPO11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 7.0,
             "price": 102.76,
-            "date": "2026-02-25",
-            "id": "e3a5ffca-96f1-4416-ae49-da44eccce653",
             "amount": 719.32,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-02-25"
         },
         {
-            "ticker": "CRPT11",
-            "type": "SELL",
-            "quantity": 6.0,
-            "price": 13.36,
-            "date": "2026-04-28",
-            "id": "882a8cda-7ba7-4c4a-b9ee-a6359cb2c067",
-            "amount": 80.16,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "HODL11",
-            "type": "SELL",
-            "quantity": 1.0,
-            "price": 63.84,
-            "date": "2026-04-28",
-            "id": "3954e273-07b6-400f-b912-f2f14a8515cf",
-            "amount": 63.84,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "IVVB11",
-            "type": "SELL",
-            "quantity": 1.0,
-            "price": 400.95,
-            "date": "2026-04-28",
-            "id": "b2807f0a-12bd-4c58-aaf1-6654d290fe03",
-            "amount": 400.95,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "NASD11",
-            "type": "SELL",
-            "quantity": 16.0,
-            "price": 18.8,
-            "date": "2026-04-28",
-            "id": "590a2ae0-b619-43e4-8881-9f3d095dda20",
-            "amount": 300.8,
-            "currency": "BRL"
-        },
-        {
+            "id": "19c7e100-b0a3-59af-9fa5-788fc2178888",
             "ticker": "BIEU39",
-            "type": "SELL",
+            "tag": "BDR",
+            "type": "BUY",
             "quantity": 1.0,
-            "price": 60.87,
-            "date": "2026-04-28",
-            "id": "3f75f3ed-cfb0-491a-b34e-15a47a95dd43",
-            "amount": 60.87,
-            "currency": "BRL"
+            "price": 65.82,
+            "amount": 65.82,
+            "currency": "BRL",
+            "date": "2026-02-27"
         },
         {
-            "ticker": "ROXO34",
-            "type": "SELL",
-            "quantity": 4.0,
-            "price": 12.19,
-            "date": "2026-04-28",
-            "id": "fc37abf1-6e45-460d-82dc-e1d9fe551cc9",
-            "amount": 48.76,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "WRLD11",
-            "type": "SELL",
-            "quantity": 3.0,
-            "price": 134.54,
-            "date": "2026-04-28",
-            "id": "a6d6e684-96f6-464c-9ea0-6659ab765483",
-            "amount": 403.62,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "DUOL34",
-            "type": "SELL",
-            "quantity": 2.0,
-            "price": 16.15,
-            "date": "2026-04-28",
-            "id": "9763f04d-4b61-483c-b639-2950c1cdb918",
-            "amount": 32.3,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "M1NS34",
-            "type": "SELL",
-            "quantity": 1.0,
-            "price": 48.34,
-            "date": "2026-04-28",
-            "id": "d2374e49-15f3-413d-b434-c6fee282aaec",
-            "amount": 48.34,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "TMCO34",
-            "type": "SELL",
-            "quantity": 1.0,
-            "price": 60.1,
-            "date": "2026-04-28",
-            "id": "b7cd8e6d-4c3d-49ed-bb24-d6ae1e12b89b",
-            "amount": 60.1,
-            "currency": "BRL"
-        },
-        {
+            "id": "b41b3b0d-8afe-5369-9314-44dcfffd5b26",
             "ticker": "RVLV",
-            "type": "SELL",
-            "quantity": 1.0,
-            "price": 26.43,
-            "date": "2026-04-28",
-            "id": "ab0abac9-c29f-4c9d-8f72-bcb2bc913569",
-            "amount": 26.43,
-            "currency": "USD"
-        },
-        {
-            "ticker": "AUPO11",
-            "type": "BUY",
-            "quantity": 5.0,
-            "price": 105.15,
-            "date": "2026-04-28",
-            "id": "be2e763c-fe8a-4d99-a416-b5ca5bea15d4",
-            "amount": 525.75,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "NTNS11",
-            "type": "BUY",
-            "quantity": 5.0,
-            "price": 64.92,
-            "date": "2026-04-28",
-            "id": "ede15b14-0d22-41d0-be94-7457a8392657",
-            "amount": 324.6,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "AUVP11",
-            "type": "BUY",
-            "quantity": 9.0,
-            "price": 129.77,
-            "date": "2026-04-28",
-            "id": "d52e7448-5007-449b-a800-bd92aca2afb3",
-            "amount": 1167.93,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "KNCA11",
-            "type": "BUY",
-            "quantity": 1.0,
-            "price": 95.52,
-            "date": "2026-04-28",
-            "id": "fdfa772d-fe07-4189-bb9c-b649bda2e0f6",
-            "amount": 95.52,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "TRXF11",
-            "type": "BUY",
-            "quantity": 1.0,
-            "price": 91.83,
-            "date": "2026-04-28",
-            "id": "441f4c82-90c7-43f3-9ea9-0d3f575146e2",
-            "amount": 91.83,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "XPML11",
-            "type": "BUY",
-            "quantity": 1.0,
-            "price": 110.64,
-            "date": "2026-04-28",
-            "id": "25704f25-3cfc-4e52-9758-d7379a5bb506",
-            "amount": 110.64,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "HGLG11",
-            "type": "BUY",
-            "quantity": 1.0,
-            "price": 156.3,
-            "date": "2026-04-28",
-            "id": "5aa5cb6b-d64e-43c7-b2b5-e4725f3a2afd",
-            "amount": 156.3,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "KNSC11",
-            "type": "BUY",
-            "quantity": 10.0,
-            "price": 9.25,
-            "date": "2026-04-28",
-            "id": "700a311a-c2fe-41a9-bfce-e862bc711eda",
-            "amount": 92.5,
-            "currency": "BRL"
-        },
-        {
-            "ticker": "VT",
-            "type": "BUY",
-            "quantity": 1.71,
-            "price": 149.84,
-            "date": "2026-04-28",
-            "id": "ce30209c-3727-4305-aa7c-80d0442a8474",
-            "amount": 256.2264,
-            "currency": "USD"
-        },
-        {
-            "ticker": "IVV",
-            "type": "BUY",
-            "quantity": 0.23,
-            "price": 719.7,
-            "date": "2026-04-28",
-            "id": "207e3acc-410b-4265-8fb5-bd1649989389",
-            "amount": 165.531,
-            "currency": "USD"
-        },
-        {
-            "ticker": "QQQ",
-            "type": "BUY",
-            "quantity": 0.11,
-            "price": 657.72,
-            "date": "2026-04-28",
-            "id": "af52fbca-9b86-4abb-9a2b-37b319e3dcb7",
-            "amount": 72.34920000000001,
-            "currency": "USD"
-        },
-        {
-            "ticker": "IBIT",
-            "type": "BUY",
-            "quantity": 1.08,
-            "price": 43.24,
-            "date": "2026-04-28",
-            "id": "1cf94034-0b10-4d77-b62b-e78c59f08622",
-            "amount": 46.699200000000005,
-            "currency": "USD"
-        },
-        {
-            "ticker": "RVLV",
+            "tag": "Stocks",
             "type": "BUY",
             "quantity": 1.0,
             "price": 27.23,
-            "date": "2026-04-20",
-            "id": "088d3e9c-3d5a-4bba-bd61-2b33878bdd36",
             "amount": 27.23,
-            "currency": "USD"
+            "currency": "USD",
+            "date": "2026-04-20"
         },
         {
+            "id": "f8c54fdb-bee3-5cc9-984d-ef220e7c30d8",
             "ticker": "IBIT",
+            "tag": "US ETFs",
             "type": "BUY",
-            "quantity": 1.17,
+            "quantity": 1.17652038,
             "price": 42.62,
-            "date": "2026-04-20",
-            "id": "9bb3c75b-b9a2-4719-ae85-c9a6af34ed86",
-            "amount": 49.865399999999994,
-            "currency": "USD"
+            "amount": 50.143298595599994,
+            "currency": "USD",
+            "date": "2026-04-20"
         },
         {
+            "id": "87ee86e2-bc85-5e2d-b686-b00c46764a42",
             "ticker": "VT",
+            "tag": "US ETFs",
             "type": "BUY",
-            "quantity": 1.11,
+            "quantity": 1.11213075,
             "price": 150.37,
-            "date": "2026-04-20",
-            "id": "19748c97-09fc-4696-878c-c7167fe67321",
-            "amount": 166.91070000000002,
-            "currency": "USD"
+            "amount": 167.23110087749998,
+            "currency": "USD",
+            "date": "2026-04-20"
         },
         {
+            "id": "d16d79c7-e67b-5442-af2e-a61e18981704",
             "ticker": "QQQ",
+            "tag": "US ETFs",
             "type": "BUY",
-            "quantity": 0.19,
+            "quantity": 0.19372505,
             "price": 646.78,
-            "date": "2026-04-20",
-            "id": "3c6364fb-1d61-4083-95a3-549b710da013",
-            "amount": 122.8882,
-            "currency": "USD"
+            "amount": 125.297487839,
+            "currency": "USD",
+            "date": "2026-04-20"
         },
         {
+            "id": "d46bb93f-92ad-594c-ad29-f76003462e56",
             "ticker": "IVV",
+            "tag": "US ETFs",
             "type": "BUY",
-            "quantity": 0.18,
+            "quantity": 0.17274378,
             "price": 712.1,
-            "date": "2026-04-20",
-            "id": "eba195ac-ceb9-414d-8966-085d9eacd585",
-            "amount": 128.178,
-            "currency": "USD"
+            "amount": 123.01084573800001,
+            "currency": "USD",
+            "date": "2026-04-20"
         },
         {
+            "id": "bfbdde6b-29c3-5739-af6e-7bf43561ecf7",
             "ticker": "AUPO11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 6.0,
             "price": 105.13,
-            "date": "2026-04-20",
-            "id": "fe70cfd3-1a06-46b0-a7d9-80deb00d8f94",
             "amount": 630.78,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-04-20"
         },
         {
+            "id": "88ba280d-fed5-5aa8-92c7-68d335c358fc",
             "ticker": "NTNS11",
+            "tag": "BR ETFs",
             "type": "BUY",
             "quantity": 5.0,
             "price": 64.58,
-            "date": "2026-04-20",
-            "id": "99d9237a-e267-495f-a164-ab0cf5ef2f8c",
             "amount": 322.9,
-            "currency": "BRL"
+            "currency": "BRL",
+            "date": "2026-04-20"
+        },
+        {
+            "id": "0009f7cf-5344-57c8-aed9-fac08decbb29",
+            "ticker": "AUVP11",
+            "tag": "BR ETFs",
+            "type": "BUY",
+            "quantity": 10.0,
+            "price": 134.95,
+            "amount": 1349.5,
+            "currency": "BRL",
+            "date": "2026-04-20"
+        },
+        {
+            "id": "88434455-e643-575e-bfca-2efcabdea94a",
+            "ticker": "CRPT11",
+            "tag": "BR ETFs",
+            "type": "SELL",
+            "quantity": 6.0,
+            "price": 13.36,
+            "amount": 80.16,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "a64115aa-f57c-50c2-841c-a7f531017269",
+            "ticker": "HODL11",
+            "tag": "BR ETFs",
+            "type": "SELL",
+            "quantity": 1.0,
+            "price": 63.84,
+            "amount": 63.84,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "25173db3-9b74-5ce4-aba5-e65d627e90a4",
+            "ticker": "IVVB11",
+            "tag": "BR ETFs",
+            "type": "SELL",
+            "quantity": 1.0,
+            "price": 400.95,
+            "amount": 400.95,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "a3a04af9-8989-59e6-ac4e-b506dfe390c2",
+            "ticker": "NASD11",
+            "tag": "BR ETFs",
+            "type": "SELL",
+            "quantity": 16.0,
+            "price": 18.8,
+            "amount": 300.8,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "389ad028-a288-5105-8b3f-34ff1b7bd7a4",
+            "ticker": "BIEU39",
+            "tag": "BDR",
+            "type": "SELL",
+            "quantity": 1.0,
+            "price": 60.87,
+            "amount": 60.87,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "7627837f-8cc5-5d53-9c1f-c80c660150fe",
+            "ticker": "ROXO34",
+            "tag": "BDR",
+            "type": "SELL",
+            "quantity": 4.0,
+            "price": 12.19,
+            "amount": 48.76,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "450be0f7-192d-5cf1-b049-ea01810e2c51",
+            "ticker": "WRLD11",
+            "tag": "BR ETFs",
+            "type": "SELL",
+            "quantity": 3.0,
+            "price": 134.54,
+            "amount": 403.62,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "23947292-4d9b-59cf-a262-801a9e7f3d12",
+            "ticker": "DUOL34",
+            "tag": "BDR",
+            "type": "SELL",
+            "quantity": 2.0,
+            "price": 16.15,
+            "amount": 32.3,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "ad3bc1a6-4ca7-55a0-982d-7599fb5cff87",
+            "ticker": "M1NS34",
+            "tag": "BDR",
+            "type": "SELL",
+            "quantity": 1.0,
+            "price": 48.34,
+            "amount": 48.34,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "c38c1011-c409-510d-a107-108391a6f679",
+            "ticker": "TMCO34",
+            "tag": "BDR",
+            "type": "SELL",
+            "quantity": 1.0,
+            "price": 60.1,
+            "amount": 60.1,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "7c7641ae-04fc-5706-b403-81bca6d602d3",
+            "ticker": "RVLV",
+            "tag": "Stocks",
+            "type": "SELL",
+            "quantity": 1.0,
+            "price": 26.43,
+            "amount": 26.43,
+            "currency": "USD",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "0a08f499-f39c-550c-a2e0-ce9b19843058",
+            "ticker": "AUPO11",
+            "tag": "BR ETFs",
+            "type": "BUY",
+            "quantity": 5.0,
+            "price": 105.208,
+            "amount": 526.04,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "fb84901f-244a-5848-93bf-2f1d76b8584b",
+            "ticker": "NTNS11",
+            "tag": "BR ETFs",
+            "type": "BUY",
+            "quantity": 5.0,
+            "price": 64.94,
+            "amount": 324.7,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "cc96c154-cbbd-5a36-b569-11f57f2afd74",
+            "ticker": "AUVP11",
+            "tag": "BR ETFs",
+            "type": "BUY",
+            "quantity": 9.0,
+            "price": 129.82222222222222,
+            "amount": 1168.4,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "014e94cd-15e7-5a24-a61b-8dda1e0f1d23",
+            "ticker": "KNCA11",
+            "tag": "FII",
+            "type": "BUY",
+            "quantity": 1.0,
+            "price": 95.53,
+            "amount": 95.53,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "65d2e8ee-1f3a-5302-aecf-dabf626ff355",
+            "ticker": "TRXF11",
+            "tag": "FII",
+            "type": "BUY",
+            "quantity": 1.0,
+            "price": 91.83,
+            "amount": 91.83,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "356f7d49-7a12-52cc-8658-31f5ce198386",
+            "ticker": "XPML11",
+            "tag": "FII",
+            "type": "BUY",
+            "quantity": 1.0,
+            "price": 110.65,
+            "amount": 110.65,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "08f65bf6-77db-5898-a8ca-b3b35ba3f7bb",
+            "ticker": "HGLG11",
+            "tag": "FII",
+            "type": "BUY",
+            "quantity": 1.0,
+            "price": 156.31,
+            "amount": 156.31,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "cef1493e-f1f6-560b-945d-a02f3aad0963",
+            "ticker": "KNSC11",
+            "tag": "FII",
+            "type": "BUY",
+            "quantity": 10.0,
+            "price": 9.25,
+            "amount": 92.5,
+            "currency": "BRL",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "1eb550a4-50a1-5d4b-84bf-f4630008beb7",
+            "ticker": "VT",
+            "tag": "US ETFs",
+            "type": "BUY",
+            "quantity": 1.71,
+            "price": 149.84188196491235,
+            "amount": 256.2296181600001,
+            "currency": "USD",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "ae916ba5-c5dc-579c-8ad4-fd9c0dfa6119",
+            "ticker": "IVV",
+            "tag": "US ETFs",
+            "type": "BUY",
+            "quantity": 0.23,
+            "price": 719.6120470269564,
+            "amount": 165.51077081619997,
+            "currency": "USD",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "31df3ced-a92c-5cf5-b19f-c0d45d6b6e34",
+            "ticker": "QQQ",
+            "tag": "US ETFs",
+            "type": "BUY",
+            "quantity": 0.11,
+            "price": 657.7693245363637,
+            "amount": 72.35462569900001,
+            "currency": "USD",
+            "date": "2026-04-28"
+        },
+        {
+            "id": "bb089b81-27d5-5291-928f-bdfec9b78a7d",
+            "ticker": "IBIT",
+            "tag": "US ETFs",
+            "type": "BUY",
+            "quantity": 1.08,
+            "price": 43.24681121666668,
+            "amount": 46.706556114000016,
+            "currency": "USD",
+            "date": "2026-04-28"
         }
     ]
 }

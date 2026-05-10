@@ -37,6 +37,10 @@ def enrich_asset(asset, prices):
     return enriched
 
 
+def current_holdings(assets):
+    return [asset for asset in assets if abs(float(asset.get('quantity', 0) or 0)) > 1e-9]
+
+
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
@@ -45,10 +49,11 @@ def index():
 @app.route('/api/wallet', methods=['GET'])
 def get_wallet():
     wallet = load_wallet()
-    prices = get_current_prices(wallet['assets'])
+    holding_assets = current_holdings(wallet['assets'])
+    prices = get_current_prices(holding_assets)
     exchange_rate = get_exchange_rate()
 
-    assets = [enrich_asset(asset, prices) for asset in wallet['assets']]
+    assets = [enrich_asset(asset, prices) for asset in holding_assets]
 
     return jsonify({
         "assets": assets,

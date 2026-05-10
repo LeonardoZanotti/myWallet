@@ -117,6 +117,15 @@ def test_remove_transaction(mock_wallet_file):
     assert loaded['assets'][0]['quantity'] == 10
     assert loaded['assets'][0]['average_price'] == 50
 
+def test_sold_out_asset_is_pruned_from_current_holdings(mock_wallet_file):
+    wallet.add_transaction({'ticker': 'A.SA', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 10, 'price': 100})
+    wallet.add_transaction({'ticker': 'A.SA', 'date': '2026-01-02', 'type': 'SELL', 'quantity': 10, 'price': 110})
+
+    loaded = wallet.load_wallet()
+
+    assert loaded['assets'] == []
+    assert len(loaded['transactions']) == 2
+
 def test_update_asset(mock_wallet_file):
     wallet.add_asset({'ticker': 'A.SA', 'weight': 50, 'tag': 'Ações'})
     result = wallet.update_asset('A.SA', {'weight': 100})

@@ -172,3 +172,9 @@ def test_investment_history_tab_shows_ledger(browser, frontend_env):
         )
         wait_for_text(browser, By.ID, "transactions-body", "VOO")
         wait_for_text(browser, By.ID, "monthly-history-body", "04/2026")
+
+        chart_data = browser.execute_script("return window.__lastEvolutionChartData")
+        assert chart_data["labels"] == ["2026-04"]
+        assert chart_data["brlBuys"] == [0]
+        assert chart_data["usdBuysInBrl"] == [750]
+        assert chart_data["accumulatedData"] == [750]

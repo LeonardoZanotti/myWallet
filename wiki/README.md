@@ -1,471 +1,225 @@
-# myWallet Wiki
+# myWallet Guide
 
-## 1. What the software does
+`myWallet` is a local investment wallet dashboard for mixed BRL and USD portfolios. It stores data in `backend/wallet.json`, fetches market prices from Yahoo Finance, renders portfolio/history views in vanilla JavaScript, and calculates smart-buy recommendations for new BRL/USD cash.
 
-`myWallet` is a local portfolio manager for mixed BRL and USD portfolios.
+## Architecture
 
-It has five main jobs:
+- `backend/app.py`: Flask routes and API response assembly.
+- `backend/wallet.py`: JSON persistence, transaction normalization, quantity/average-price recalculation, investment summaries.
+- `backend/calculator.py`: smart-buy allocation algorithm.
+- `backend/finance.py`: Yahoo Finance prices and USD/BRL exchange rate.
+- `backend/validation.py`: request validation and type coercion.
+- `frontend/index.html`: dashboard structure, tabs, tables, forms, modals.
+- `frontend/app.js`: data fetching, rendering, forms, charts, smart-buy modal.
+- `scratch_populate.py`: deterministic seed script that recreates the current sample wallet and historical ledger.
+- `tests/`: backend, calculator, finance, validation, seed, and Selenium browser tests.
 
-1. store wallet data locally in `backend/wallet.json`
-2. fetch live prices and USD/BRL FX data
-3. render grouped wallet summaries and allocation views
-4. calculate a smart-buy recommendation for new BRL and USD cash
-5. track monthly contribution releases and investment history
+## Data Model
 
-## 2. Architecture
+`wallet.json` has three top-level keys:
 
-### Backend
+- `assets`: current holdings only. Sold-out tickers are removed from this list.
+- `transactions`: full buy/sell ledger, including sold-out tickers for history.
+- `groups`: target weights per asset category.
 
-- `backend/app.py`
-  Exposes the HTTP routes used by the frontend.
-- `backend/wallet.py`
-  Reads and writes the local JSON wallet file.
-- `backend/validation.py`
-  Validates asset, group, and smart-buy payloads before business logic runs.
-- `backend/finance.py`
-  Queries Yahoo Finance for current prices and the USD/BRL exchange rate.
-- `backend/calculator.py`
-  Computes the smart-buy recommendation.
+### Asset
 
-### Frontend
+Stored fields:
 
-- `frontend/index.html`
-  Defines the dashboard, forms, chart, and modal shells.
-- `frontend/app.js`
-  Fetches wallet data, renders tables and summary cards, handles add/edit/delete actions, and renders the smart-buy modal.
-
-## 3. Data model
-
-### Transaction fields (Ledger)
-
-The application now uses an Event-Sourced (Ledger) model. `wallet.json` contains a `transactions` array, which is the single source of truth for quantity and average price. Each transaction has:
-- `id`
-- `date`
-- `type` (BUY or SELL)
 - `ticker`
 - `quantity`
-- `price`
-- `amount`
-- `currency` (BRL or USD)
-
-Monthly contribution releases in the UI create one BUY transaction per investment line. When a line has `amount` and `price`, the backend derives `quantity` as `amount / price`, so users can enter "R$ X into this ETF" or "$ Y into this stock" without manually calculating fractional shares.
-
-### Asset fields
-
-Each asset in `wallet.json` is a cached view of the ledger. User-configurable fields:
-- `ticker`
+- `average_price`
 - `weight`
 - `tag`
 
-Derived/Cached fields calculated automatically from transactions:
+`quantity` and `average_price` are recalculated from transactions on load and after transaction changes. Values are rounded to 8 decimals to avoid floating-point noise.
+
+### Transaction
+
+Stored fields:
+
+- `id`
+- `date`
+- `type`: `BUY` or `SELL`
+- `ticker`
+- `tag`
 - `quantity`
-- `average_price`
+- `price`
+- `amount`
+- `currency`: `BRL` or `USD`
 
-Derived fields added at runtime include:
+When a transaction has `amount` and `price` but no quantity, quantity is derived as:
 
-- `currency`
-- `current_price`
-- `variation`
-- `total_value`
-- `ideal_percent`
-- `shares_to_buy`
-- `value_to_buy`
+`quantity = amount / price`
 
-### Group fields
+BUY increases quantity and cost basis. SELL reduces quantity but keeps the existing average-price basis for the remaining shares. If a sale fully closes a position, the asset is pruned from current holdings while the transaction remains in history.
 
-Each group is keyed by `tag`.
+### Currency
 
-Supported stored field today:
+An asset is BRL when its `tag` is in `BRL_CATEGORIES` or its ticker ends with `.SA`; otherwise it is USD.
 
-- `target_percent`
+Yahoo Finance lookups append `.SA` for BRL categories when needed. USD assets are queried without suffix.
 
-This is the configured group weight before normalization.
-
-## 4. Currency classification
-
-The code treats an asset as BRL when its `tag` belongs to the configured `BRL_CATEGORIES` (e.g., `BDR`, `FII`, `Ações`, `BR ETFs`).
-
-Otherwise, the asset is treated as USD.
-
-### Note on Yahoo Finance and the `.SA` suffix
-Yahoo Finance requires the `.SA` suffix to locate Brazilian assets traded on the B3 exchange (e.g. `BBOV11` must be queried as `BBOV11.SA`). U.S. ETFs (like `VT`, `IVV`) do not require a suffix because Yahoo defaults to US exchanges. 
-Our finance module handles this invisibly by appending `.SA` to the ticker before querying the Yahoo API if the asset belongs to a BRL category.
-
-This affects:
-
-- how market data is queried
-- whether value stays native or is converted with the exchange rate
-- whether smart-buy shares can be fractional
-
-## 5. Backend API
+## API
 
 ### `GET /api/wallet`
 
 Returns:
 
-- assets with derived `currency`, `current_price`, `variation`, and `total_value`
-- saved group configuration
-- transactions and an `investment_summary` with monthly BRL/USD contribution totals
-- current exchange rate
-- JSON error messages when the request cannot be processed
+- active assets enriched with `currency`, `current_price`, `variation`, and `total_value`
+- `groups`
+- `transactions`
+- `investment_summary`
+- `exchange_rate`
+
+Only current holdings are returned in `assets`; sold-out assets remain visible through `transactions`.
 
 ### `POST /api/wallet/asset`
 
-Adds a new asset metadata. If the ticker already exists, it updates `weight` and `tag`.
+Creates asset metadata or updates an existing ticker's `weight` and `tag`.
 
 ### `PUT /api/wallet/asset/<ticker>`
 
-Overwrites any provided asset fields (`weight` or `tag`).
-
-Returns `404` when the asset does not exist.
+Updates existing asset metadata.
 
 ### `DELETE /api/wallet/asset/<ticker>`
 
-Removes the asset and permanently deletes all associated transactions.
-
-Returns `404` when the asset does not exist.
+Deletes the asset and all of its transactions.
 
 ### `POST /api/wallet/transaction`
 
-Adds a new BUY or SELL transaction to the ledger. This automatically recalculates the `quantity` and `average_price` of the associated asset. For a SELL transaction, it reduces the quantity but maintains the historical average price base.
+Adds a BUY/SELL entry and recalculates the affected asset. Payloads may include either `quantity + price` or `amount + price`.
 
-Accepted transaction payloads can provide either:
-
-- `quantity` and `price`
-- `amount` and `price`, where quantity is derived automatically
-
-Optional `currency`, `tag`, and `weight` fields let a contribution release create or update the asset metadata at the same time as the ledger entry.
+Optional `currency`, `tag`, and `weight` let a new investment line create/update asset metadata at the same time.
 
 ### `DELETE /api/wallet/transaction/<id>`
 
-Removes a transaction and recalculates the asset's state.
+Deletes one ledger entry and recalculates the affected asset.
 
 ### `PUT /api/wallet/group/<tag>`
 
-Creates or updates group configuration, currently `target_percent`.
+Sets `target_percent` for a category. `null` means no explicit target.
 
 ### `POST /api/smart-buy`
 
-Accepts:
+Accepts `invest_brl` and `invest_usd`; returns recommendations plus leftover cash.
 
-- `invest_brl`
-- `invest_usd`
+## Portfolio Calculations
 
-Returns:
-
-- `recommendations`
-- `leftover_brl`
-- `leftover_usd`
-
-Validation errors return `400` with a specific JSON message.
-
-## 6. Dashboard calculations
-
-This section explains what every visible metric means.
-
-### Summary cards
-
-#### Total Patrimony (Unified)
-
-Formula:
-
-`sum(asset.total_value * rate)`
-
-Where:
-
-- `rate = 1` for BRL assets
-- `rate = exchange_rate` for USD assets
-
-This is the wallet value translated into BRL.
-
-#### Total USD Assets
-
-Formula:
-
-`sum(asset.total_value for USD assets)`
-
-This stays in USD.
-
-#### Total BRL Assets
-
-Formula:
-
-`sum(asset.total_value for BRL assets)`
-
-This stays in BRL.
-
-#### Unified Return
-
-Formula:
-
-`((total_patrimony_unified - total_cost_unified) / total_cost_unified) * 100`
-
-Where:
-
-`total_cost_unified = sum(quantity * average_price * rate)`
-
-If total cost is zero, return is shown as `0`.
-
-### Group card header
-
-Each rendered group shows:
-
-- actual wallet share
-- configured target label
-- current group value
-- group return
-
-#### Group actual wallet share
-
-Formula:
-
-`(group_total_unified / total_patrimony_unified) * 100`
-
-#### Group value
-
-Formula:
-
-`sum(asset.total_value)`
-
-Shown in the group's own currency.
-
-#### Group return
-
-Formula:
-
-`((group_total - group_cost) / group_cost) * 100`
-
-Where:
-
-- `group_total = sum(asset.total_value)`
-- `group_cost = sum(quantity * average_price)`
-
-This return is calculated in the group's own currency.
-
-### Asset table columns
-
-#### Asset
-
-Raw `ticker`.
-
-#### Qty
-
-Raw `quantity`.
-
-#### Avg Price
-
-Raw `average_price`, formatted in the asset currency.
-
-#### Current
-
-Current market price from Yahoo Finance. If no price is returned, the UI shows `N/A`.
-
-#### Variation
-
-Formula:
-
-`((current_price - average_price) / average_price) * 100`
-
-If `average_price` is zero or `current_price` is missing, variation is shown as `0`.
-
-#### Value
-
-Formula:
-
-`quantity * current_price`
-
-If `current_price` is missing, backend fallback is:
-
-`quantity * average_price`
-
-#### Weight
-
-Raw asset `weight`.
-
-#### % Group
-
-The column shows two values:
-
-- actual group share
-- target share inside the group
-
-Actual formula:
-
-`(asset.total_value / group_total) * 100`
-
-Target formula:
-
-`(asset.weight / total_group_weight) * 100`
-
-If group total or total group weight is zero, the corresponding percentage is `0`.
-
-#### % Wallet
-
-The column also shows two values:
-
-- actual wallet share
-- target wallet share
-
-Actual formula:
-
-`(asset_unified_value / total_patrimony_unified) * 100`
-
-Where:
-
-`asset_unified_value = asset.total_value * rate`
-
-Target wallet share formula:
-
-1. normalize each group target across all groups that exist in the wallet
-2. multiply that normalized group share by the asset's target share inside the group
-
-Explicitly:
-
-`normalized_group_target = group_target_percent / sum(all_group_target_percents)`
-
-`target_wallet_share = normalized_group_target * (asset.weight / total_group_weight)`
-
-If a group has no configured target, the UI and calculator both treat it as `50` during normalization.
-
-If every group target is absent or null, all groups become equal because each one contributes the same fallback `50`.
-
-## 6.5 UI error handling and resilience
-
-The frontend now shows inline status messages in `#app-feedback` instead of relying only on alerts.
-
-This is used for:
-
-- invalid smart-buy input
-- failed add/edit/delete actions
-- failed group target updates
-- failed wallet refreshes
-
-The frontend also guards against missing CDN scripts:
-
-- the Tailwind config script checks whether `window.tailwind` exists before using it
-- chart rendering exits early when `Chart` is unavailable
-
-That keeps the page functional in restricted or offline environments, including the real browser test environment.
-
-## 7. Smart-buy algorithm
-
-The smart-buy logic lives in `backend/calculator.py`.
-
-It runs in five stages.
-
-```mermaid
-flowchart TD
-    A[Start Smart Buy] --> B[Stage 1: Prepare Asset Values & Groups]
-    B --> C[Stage 2: Compute Ideal Group Values]
-    C --> D[Stage 3: Split Cash by Currency Bucket]
-    D --> E[Stage 4: Split Group Allocations across Assets]
-    E --> F[Stage 5: Convert Allocations into Orders]
-    F --> G[Return Recommendations & Leftover Cash]
-```
-
-### Stage 1: prepare asset values
+### Price and Value
 
 For each asset:
 
-1. pick `current_price`
-   - use fetched market price when available
-   - otherwise fall back to `average_price`
-2. compute native current value
-   - `current_value_native = quantity * current_price`
-3. detect `currency`
-4. compute unified BRL value
-   - BRL asset: `current_value_brl = current_value_native`
-   - USD asset: `current_value_brl = current_value_native * exchange_rate`
-5. accumulate group totals and total wallet value
+- `current_price = Yahoo price`, or `average_price` when Yahoo has no price.
+- `total_value = quantity * current_price`.
+- `variation = ((current_price - average_price) / average_price) * 100`.
+- if `average_price` is zero or price is missing, variation is `0`.
 
-### Stage 2: compute ideal group values
+### Unified BRL Values
 
-The calculator first computes the future wallet value:
+For comparisons across currencies:
 
-`new_total_wallet_brl = current_total_wallet_brl + invest_brl + (invest_usd * exchange_rate)`
+- BRL rate: `1`
+- USD rate: `exchange_rate`
+- `unified_value = total_value * rate`
+- `cost_unified = quantity * average_price * rate`
 
-Then it reads `target_percent` from every group.
+Dashboard cards:
 
-Normalization rule:
+- Total Patrimony: `sum(unified_value)`
+- Total BRL Assets: `sum(total_value for BRL assets)`
+- Total USD Assets: `sum(total_value for USD assets)`
+- Unified Return: `((sum(unified_value) - sum(cost_unified)) / sum(cost_unified)) * 100`
 
-- configured targets are summed across all existing groups
-- missing targets are treated as `0` during this first pass
-- if the total ends up as `0`, every group is assigned fallback `50`
+### Group Values
 
 For each group:
 
-`group_ideal_percent = group_target_percent / total_wallet_target`
+- native group value: `sum(asset.total_value)`
+- group cost: `sum(quantity * average_price)`
+- group return: `((group_value - group_cost) / group_cost) * 100`
+- wallet share: `group_unified_value / total_unified_value`
 
-`group_ideal_value_brl = new_total_wallet_brl * group_ideal_percent`
+### Asset Allocation Columns
 
-`group_deficit_brl = max(0, group_ideal_value_brl - group_current_value_brl)`
+Inside a group:
 
-Important nuance:
+- actual group share: `asset.total_value / group_value`
+- target group share: `asset.weight / sum(group asset weights)`
 
-The ideal portfolio is global, but the money buckets are separate. BRL cash can only buy BRL assets, and USD cash can only buy USD assets. That means a recommendation can still have leftover cash or remain off-target when the available currency does not match the biggest deficit.
+Inside the whole wallet:
 
-### Stage 3: split incoming cash by currency bucket
+- actual wallet share: `asset.unified_value / total_unified_value`
+- normalized group target: `group.target_percent / sum(all visible group targets)`
+- target wallet share: `normalized_group_target * target_group_share`
 
-BRL investment is spread only across BRL groups:
+If no group target is set, the UI uses fallback `50` for display normalization. If all calculator targets are absent or zero, the calculator also falls back to equal group weights.
 
-`group_brl_cash = invest_brl * (group_deficit_brl / total_brl_deficit)`
+## Investment History
 
-USD investment is spread only across USD groups:
+The Investment History tab uses `transactions` and `investment_summary`.
 
-`group_usd_cash = invest_usd * (group_deficit_usd_native / total_usd_deficit_native)`
+`investment_summary` contains:
 
-If a bucket has zero deficit, no cash from that bucket is allocated and it becomes leftover.
+- total BUY and SELL amounts by BRL/USD
+- gross invested BRL equivalent
+- net invested BRL equivalent
+- monthly rows
+- by-asset totals
 
-### Stage 4: split each group allocation across its assets
+Monthly rows include:
 
-Inside each group:
+- `buy_brl`
+- `buy_usd`
+- `sell_brl`
+- `sell_usd`
+- `gross_brl_equivalent`
+- `net_brl_equivalent`
 
-`asset_pct_in_group = asset.weight / total_group_weight`
+The monthly chart uses the same monthly data as the table:
 
-`asset_ideal_percent = asset_pct_in_group * group_ideal_percent`
+- green bars: BRL buys
+- blue bars: USD buys converted to BRL
+- amber line: accumulated net invested in BRL equivalent
 
-`asset_ideal_value_brl = group_ideal_value_brl * asset_pct_in_group`
+Selenium tests assert the rendered history and chart data for ledger fixtures.
 
-Convert ideal value back to native currency when needed:
+## Smart-Buy Algorithm
 
-- BRL: `asset_ideal_value_native = asset_ideal_value_brl`
-- USD: `asset_ideal_value_native = asset_ideal_value_brl / exchange_rate`
+The calculator receives active assets, current prices, BRL cash, USD cash, group targets, and exchange rate.
 
-Then compute native deficit:
+1. Prepare each asset with current price, native value, BRL-equivalent value, currency, and group.
+2. Compute future wallet value:
 
-`asset_deficit_native = max(0, asset_ideal_value_native - asset_current_value_native)`
+   `new_total_brl = current_total_brl + invest_brl + invest_usd * exchange_rate`
 
-Group cash is distributed proportionally to those asset deficits:
+3. Normalize group targets and compute each group's ideal BRL value:
 
-`asset_value_to_buy_fractional = group_cash_to_invest_native * (asset_deficit_native / total_group_asset_deficit_native)`
+   `group_ideal_value = new_total_brl * normalized_group_target`
 
-If total group weight is zero, the assets in that group get `ideal_percent = 0` and receive no allocation.
+4. Compute group deficits:
 
-### Stage 5: convert allocations into orders
+   `group_deficit = max(0, group_ideal_value - group_current_value)`
 
-#### USD assets
+5. Split incoming cash by currency bucket:
 
-USD assets stay fractional:
+   - BRL cash can only buy BRL groups.
+   - USD cash can only buy USD groups.
+   - if a currency bucket has no deficit, its cash remains leftover.
 
-`shares_to_buy = value_to_buy / current_price`
+6. Split each group's cash across assets by asset-level deficits:
 
-#### BRL assets
+   - `asset_target_in_group = asset.weight / group_weight_sum`
+   - `asset_ideal_value = group_ideal_value * asset_target_in_group`
+   - `asset_deficit = max(0, asset_ideal_value_native - asset_current_value_native)`
 
-BRL assets are converted to whole shares:
+7. Convert values to shares:
 
-1. base pass:
-   `shares_to_buy = floor(value_to_buy_fractional / current_price)`
-2. leftover pass:
-   spend remaining BRL one share at a time on the eligible asset with the largest remaining deficit
+   - USD assets allow fractional shares.
+   - BRL assets are floored to whole shares.
+   - remaining BRL cash is greedily spent one share at a time on the most under-allocated eligible BRL asset.
 
-The leftover pass stops when:
-
-- no BRL asset has a positive price small enough to fit in the remaining BRL cash
-- or no remaining deficit beats the current best candidate
-
-### Returned smart-buy fields
-
-For each recommendation row:
+Returned per asset:
 
 - `ticker`
 - `tag`
@@ -476,80 +230,59 @@ For each recommendation row:
 - `value_to_buy`
 - `shares_to_buy`
 
-And globally:
+Returned globally:
 
 - `leftover_brl`
 - `leftover_usd`
 
-## 8. Smart-buy modal calculations
+## Frontend Behavior
 
-The recommendation modal uses backend results plus frontend display math.
+- The portfolio tab shows current holdings only.
+- The investment history tab shows historical ledger entries, including sold-out tickers.
+- New Investment Release creates one BUY transaction per line.
+- Add Adjustment opens the low-level ledger modal for BUY/SELL fixes.
+- Charts expose their source datasets to tests so rendered graph inputs can be verified.
+- If Chart.js is unavailable, tables and calculations still render.
+- Feedback messages appear inline in `#app-feedback`.
 
-### Current %
+## Seed Data
 
-Formula:
-
-`(current_unified_value / total_current_recommendation_value_unified) * 100`
-
-### Ideal %
-
-Formula:
-
-`ideal_percent * 100`
-
-### Smart Buy
-
-For BRL:
-
-- buy amount is shown in BRL
-- shares are shown as an integer
-
-For USD:
-
-- buy amount is shown in USD
-- shares are shown with two decimals
-
-### Post-Inv %
-
-Formula:
-
-`(post_investment_unified_value / new_total_brl) * 100`
-
-Where:
-
-- `post_investment_native_value = current_value + value_to_buy`
-- `post_investment_unified_value = post_investment_native_value * rate`
-- `new_total_brl = total_current_brl_unified + invest_brl + (invest_usd * exchange_rate)`
-
-### Leftover Cash
-
-Shown only when either leftover value is greater than zero.
-
-## 9. Known behavior and constraints
-
-- If Yahoo Finance returns no current price, the wallet still works by falling back to average price for valuation.
-- Group target percentages are relative weights, not absolute final wallet percentages unless they already sum to `100`.
-- Setting all group targets to zero does not create a zero-allocation portfolio. The calculator falls back to equal group weights.
-- BRL recommendations are intentionally discrete because the algorithm assumes whole-share purchases.
-- Mixed-currency targets can be mathematically ideal even when the available new cash is only in one currency.
-
-## 10. Test coverage
-
-The project test suite covers:
-
-- wallet file loading, saving, merging, updates, and deletion
-- finance lookups and fallback behavior
-- all smart-buy branches in the backend calculator
-- Flask routes for wallet and smart-buy APIs
-- real browser frontend behavior for:
-  - initial page load
-  - add asset submission
-  - inline smart-buy validation
-  - smart-buy modal rendering
-  - end-to-end UI rendering with a live Flask server and Chromium
-
-Run everything with:
+Run:
 
 ```bash
-python3 -m pytest tests/
+python3 scratch_populate.py
 ```
+
+This recreates:
+
+- 17 active holdings
+- 54 historical transactions
+- group targets for `Ações`, `US ETFs`, `BR ETFs`, and `FII`
+
+The seed reconciles active holdings to the current reference wallet while preserving buy/sell history.
+
+## Test and Coverage
+
+Run the normal suite:
+
+```bash
+pytest -q
+```
+
+Run coverage:
+
+```bash
+pytest --cov=backend --cov=scratch_populate --cov-branch --cov-report=term-missing -q
+```
+
+Current backend and seed coverage is 100% statement and branch coverage. The suite includes:
+
+- wallet migration, normalization, pruning, summaries, CRUD, edge sells
+- validation success/error branches
+- smart-buy allocation math and leftovers
+- finance price/FX fallbacks
+- Flask API routes
+- deterministic seed recreation
+- Selenium browser flows for portfolio, smart-buy modal, investment history, monthly chart data
+
+Coverage does not prove financial advice correctness, but it does assert the implemented rules above exhaustively for the backend and through representative browser flows for the UI.

@@ -116,10 +116,12 @@ def test_validate_transaction_payload_derives_quantity_from_amount():
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 0, 'price': 1}, 'Quantity must be greater than zero.'),
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 1, 'price': -1}, 'Price must be zero or greater.'),
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'price': 1}, 'Either quantity or amount is required.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 0, 'price': 1}, 'Amount must be greater than zero.'),
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 0}, 'Price must be greater than zero when amount is used.'),
-    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'currency': 'EUR'}, 'Currency must be BRL or USD.')
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'currency': 'EUR'}, 'Currency must be BRL or USD.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'tag': '   '}, 'Category is required.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'weight': 101}, 'Weight must be between 0 and 100.')
 ])
 def test_validate_transaction_payload_errors(payload, error_message):
     with pytest.raises(ValidationError, match=error_message):
         validate_transaction_payload(payload)
-

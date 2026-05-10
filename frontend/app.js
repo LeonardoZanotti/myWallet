@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetVal.trim() !== '') {
             data.target_percent = parseLocalizedNumber(targetVal);
         } else {
-            data.target_percent = null; // Removing target
+            data.target_percent = null;
         }
         
         showLoader();
@@ -454,8 +454,6 @@ function renderTransactions(transactions) {
 }
 
 function renderEvolutionChart(transactions) {
-    if (typeof Chart === 'undefined') return;
-    const ctx = document.getElementById('evolutionChart').getContext('2d');
     const monthly = globalInvestmentSummary && globalInvestmentSummary.monthly
         ? globalInvestmentSummary.monthly
         : buildMonthlySummaryFromTransactions(transactions);
@@ -467,6 +465,10 @@ function renderEvolutionChart(transactions) {
         accumulated += item.net_brl_equivalent || 0;
         return accumulated;
     });
+    window.__lastEvolutionChartData = { labels, brlBuys, usdBuysInBrl, accumulatedData };
+
+    if (typeof Chart === 'undefined') return;
+    const ctx = document.getElementById('evolutionChart').getContext('2d');
 
     if (evolutionChartInstance) {
         evolutionChartInstance.destroy();
@@ -946,24 +948,23 @@ function assetCurrency(ticker) {
 }
 
 function renderChart(groups, exchangeRate = 5.0) {
-    if (typeof Chart === 'undefined') {
-        return;
-    }
-    const ctx = document.getElementById('portfolioChart').getContext('2d');
-    
     const labels = [];
     const data = [];
     const bgColors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#14b8a6'];
     
-    let i = 0;
     for (const [tag, groupAssets] of Object.entries(groups)) {
         labels.push(tag);
         data.push(groupAssets.reduce((sum, a) => {
             const rate = a.currency === 'USD' ? exchangeRate : 1.0;
             return sum + (a.total_value * rate);
         }, 0));
-        i++;
     }
+    window.__lastPortfolioChartData = { labels, data };
+    
+    if (typeof Chart === 'undefined') {
+        return;
+    }
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
     
     if (portfolioChartInstance) {
         portfolioChartInstance.destroy();

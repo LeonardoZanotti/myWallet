@@ -32,6 +32,10 @@ def load_wallet():
                         })
                 needs_save = True
                 
+            for asset in data.get('assets', []):
+                asset.setdefault('quantity', 0.0)
+                asset.setdefault('average_price', 0.0)
+                
             if needs_save:
                 save_wallet(data)
             return data

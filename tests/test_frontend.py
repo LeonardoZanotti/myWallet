@@ -85,12 +85,22 @@ def test_add_asset_flow_renders_real_row(browser, frontend_env):
     with live_server(backend_app.app) as url:
         browser.get(url)
 
+        # Add Asset metadata
         browser.find_element(By.ID, "add-ticker").send_keys("ivvb11")
-        browser.find_element(By.ID, "add-qty").send_keys("10,5")
-        browser.find_element(By.ID, "add-price").send_keys("100,0")
         browser.find_element(By.ID, "add-weight").send_keys("80")
         browser.find_element(By.ID, "add-tag").send_keys("BR ETFs")
         browser.find_element(By.CSS_SELECTOR, "#add-asset-form button[type='submit']").click()
+
+        import time
+        # Add Transaction
+        browser.execute_script("""
+            openTxModal();
+            document.getElementById('tx-ticker').value = 'IVVB11';
+            document.getElementById('tx-qty').value = '10,5';
+            document.getElementById('tx-price').value = '100,0';
+            document.getElementById('tx-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        """)
+        time.sleep(1.0)
 
         wait_for_text(browser, By.ID, "asset-groups-container", "IVVB11")
         wait_for_text(browser, By.ID, "total-brl", "R$")
@@ -113,10 +123,14 @@ def test_zero_investment_shows_inline_error(browser, frontend_env):
 def test_smart_buy_modal_opens_for_real(browser, frontend_env):
     frontend_env.write_text(json.dumps({
         "assets": [
-            {"ticker": "PETR4.SA", "quantity": 1, "average_price": 25, "weight": 100, "tag": "Ações"},
-            {"ticker": "VOO", "quantity": 1, "average_price": 100, "weight": 100, "tag": "US ETFs"}
+            {"ticker": "PETR4.SA", "weight": 100, "tag": "Ações"},
+            {"ticker": "VOO", "weight": 100, "tag": "US ETFs"}
         ],
-        "groups": {"Ações": {"target_percent": 50}, "US ETFs": {"target_percent": 50}}
+        "groups": {"Ações": {"target_percent": 50}, "US ETFs": {"target_percent": 50}},
+        "transactions": [
+            {"id": "1", "ticker": "PETR4.SA", "type": "BUY", "quantity": 1, "price": 25, "date": "2026-01-01"},
+            {"id": "2", "ticker": "VOO", "type": "BUY", "quantity": 1, "price": 100, "date": "2026-01-01"}
+        ]
     }, ensure_ascii=False), encoding="utf-8")
 
     with live_server(backend_app.app) as url:

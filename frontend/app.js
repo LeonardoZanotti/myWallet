@@ -322,7 +322,7 @@ function renderEvolutionChart(transactions) {
 
     chronoTxs.forEach(tx => {
         const d = new Date(tx.date);
-        const monthKey = \`\${d.getFullYear()}-\${String(d.getMonth() + 1).padStart(2, '0')}\`;
+        const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         
         const value = tx.quantity * tx.price;
         if (tx.type === 'BUY') {
@@ -345,7 +345,7 @@ function renderEvolutionChart(transactions) {
         data: {
             labels: labels.map(l => {
                 const parts = l.split('-');
-                return \`\${parts[1]}/\${parts[0]}\`;
+                return `${parts[1]}/${parts[0]}`;
             }),
             datasets: [{
                 label: 'Invested Value (Aportes)',
@@ -378,11 +378,11 @@ function renderEvolutionChart(transactions) {
 }
 
 async function deleteTransaction(id) {
-    if (confirm(\`Remove transaction?\`)) {
+    if (confirm(`Remove transaction?`)) {
         clearFeedback();
         showLoader();
         try {
-            const response = await fetch(\`/api/wallet/transaction/\${id}\`, { method: 'DELETE' });
+            const response = await fetch(`/api/wallet/transaction/${id}`, { method: 'DELETE' });
             if (!response.ok) {
                 const payload = await response.json();
                 showFeedback(payload.error || 'Could not remove transaction.');
@@ -427,7 +427,7 @@ function renderWallet(assets, exchangeRate = 5.0) {
     
     const variation = totalCostUnified > 0 ? ((totalPatrimonyUnified - totalCostUnified) / totalCostUnified) * 100 : 0;
     const variationEl = document.getElementById('total-variation');
-    variationEl.innerHTML = \`<span class="\${variation >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium flex items-center"><i class="fa-solid fa-arrow-trend-\${variation >= 0 ? 'up' : 'down'} mr-1"></i> \${variation.toFixed(2)}%</span>\`;
+    variationEl.innerHTML = `<span class="${variation >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium flex items-center"><i class="fa-solid fa-arrow-trend-${variation >= 0 ? 'up' : 'down'} mr-1"></i> ${variation.toFixed(2)}%</span>`;
 
     let totalGroupTargets = 0;
     for (const [tag, groupAssets] of Object.entries(groups)) {
@@ -445,12 +445,12 @@ function renderWallet(assets, exchangeRate = 5.0) {
     container.innerHTML = '';
 
     if (assets.length === 0) {
-        container.innerHTML = \`
+        container.innerHTML = `
         <div class="bg-dark-card rounded-2xl border border-dark-border shadow-lg p-10 text-center text-dark-muted">
             <div class="text-4xl mb-3"><i class="fa-solid fa-wallet"></i></div>
             <p class="font-medium text-white mb-1">No assets yet</p>
             <p>Add your first asset to start tracking the wallet.</p>
-        </div>\`;
+        </div>`;
         renderChart({}, exchangeRate);
         return;
     }
@@ -463,42 +463,42 @@ function renderWallet(assets, exchangeRate = 5.0) {
         
         let pctInWallet = totalPatrimonyUnified > 0 ? (groupTotal * (cur === 'USD' ? exchangeRate : 1.0) / totalPatrimonyUnified) * 100 : 0;
         let groupTargetStr = walletGroups[tag] && walletGroups[tag].target_percent !== undefined && walletGroups[tag].target_percent !== null
-            ? \`Target: \${walletGroups[tag].target_percent}%\`
-            : \`No target set\`;
+            ? `Target: ${walletGroups[tag].target_percent}%`
+            : `No target set`;
         
-        let html = \`
+        let html = `
         <div class="bg-dark-card rounded-2xl border border-dark-border shadow-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-dark-border flex justify-between items-center bg-dark-bg/30">
                 <div>
                     <h3 class="font-bold flex items-center">
-                        <i class="fa-solid fa-layer-group text-dark-muted mr-2"></i> \${tag}
-                        <button onclick="openGroupEditModal('\${encodeURIComponent(tag)}')" class="ml-3 text-xs text-brand-blue hover:text-blue-400"><i class="fa-solid fa-pen"></i></button>
+                        <i class="fa-solid fa-layer-group text-dark-muted mr-2"></i> ${tag}
+                        <button onclick="openGroupEditModal('${encodeURIComponent(tag)}')" class="ml-3 text-xs text-brand-blue hover:text-blue-400"><i class="fa-solid fa-pen"></i></button>
                     </h3>
-                    <p class="text-xs text-dark-muted mt-1">\${pctInWallet.toFixed(1)}% of Wallet • \${groupTargetStr}</p>
+                    <p class="text-xs text-dark-muted mt-1">${pctInWallet.toFixed(1)}% of Wallet • ${groupTargetStr}</p>
                 </div>
                 <div class="text-sm text-right">
-                    <div class="text-dark-muted">Value: <span class="text-white font-medium">\${formatCurrency(groupTotal, cur)}</span></div>
-                    <div class="\${groupVar >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium">\${groupVar >= 0 ? '+' : ''}\${groupVar.toFixed(2)}%</div>
+                    <div class="text-dark-muted">Value: <span class="text-white font-medium">${formatCurrency(groupTotal, cur)}</span></div>
+                    <div class="${groupVar >= 0 ? 'text-brand-green' : 'text-brand-red'} font-medium">${groupVar >= 0 ? '+' : ''}${groupVar.toFixed(2)}%</div>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-dark-muted text-xs uppercase tracking-wider border-b border-dark-border bg-dark-bg/10">
-                            <th class="py-3 px-3 cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('ticker')">Asset \${sortIcon('ticker')}</th>
+                            <th class="py-3 px-3 cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('ticker')">Asset ${sortIcon('ticker')}</th>
                             <th class="py-3 px-3">Qty</th>
                             <th class="py-3 px-3">Avg Price</th>
                             <th class="py-3 px-3">Current</th>
                             <th class="py-3 px-3">Variation</th>
                             <th class="py-3 px-3">Value</th>
-                            <th class="py-3 px-3 text-center cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('weight')">Weight \${sortIcon('weight')}</th>
-                            <th class="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('pctInGroup')">% Group \${sortIcon('pctInGroup')}</th>
+                            <th class="py-3 px-3 text-center cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('weight')">Weight ${sortIcon('weight')}</th>
+                            <th class="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('pctInGroup')">% Group ${sortIcon('pctInGroup')}</th>
                             <th class="py-3 px-3 text-right whitespace-nowrap">% Wallet</th>
                             <th class="py-3 px-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm divide-y divide-dark-border">
-        \`;
+        `;
         
         let totalGroupWeight = groupAssets.reduce((sum, a) => sum + a.weight, 0);
         
@@ -535,30 +535,30 @@ function renderWallet(assets, exchangeRate = 5.0) {
             
             const targetPctInWallet = normalizedGroupTarget * (targetPctInGroup / 100);
             
-            html += \`
+            html += `
             <tr class="asset-row">
-                <td class="py-3 px-3 font-medium">\${a.ticker}</td>
-                <td class="py-3 px-3">\${a.quantity}</td>
-                <td class="py-3 px-3">\${formatCurrency(a.average_price, a.currency)}</td>
-                <td class="py-3 px-3">\${priceText}</td>
+                <td class="py-3 px-3 font-medium">${a.ticker}</td>
+                <td class="py-3 px-3">${a.quantity}</td>
+                <td class="py-3 px-3">${formatCurrency(a.average_price, a.currency)}</td>
+                <td class="py-3 px-3">${priceText}</td>
                 <td class="py-3 px-3">
-                    <span class="\${isPositive ? 'variation-positive' : 'variation-negative'} inline-flex items-center text-xs font-semibold">
-                        \${isPositive ? '+' : ''}\${a.variation.toFixed(2)}%
+                    <span class="${isPositive ? 'variation-positive' : 'variation-negative'} inline-flex items-center text-xs font-semibold">
+                        ${isPositive ? '+' : ''}${a.variation.toFixed(2)}%
                     </span>
                 </td>
-                <td class="py-3 px-3 font-medium">\${formatCurrency(a.total_value, a.currency)}</td>
-                <td class="py-3 px-3 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">\${a.weight}</span></td>
-                <td class="py-3 px-3 text-right font-medium text-white">\${a.pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ \${targetPctInGroup.toFixed(1)}%</span></td>
-                <td class="py-3 px-3 text-right font-medium text-purple-400">\${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ \${targetPctInWallet.toFixed(1)}%</span></td>
+                <td class="py-3 px-3 font-medium">${formatCurrency(a.total_value, a.currency)}</td>
+                <td class="py-3 px-3 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.weight}</span></td>
+                <td class="py-3 px-3 text-right font-medium text-white">${a.pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
+                <td class="py-3 px-3 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInWallet.toFixed(1)}%</span></td>
                 <td class="py-3 px-3 text-right">
-                    <button onclick="openEditModal('\${encodeURIComponent(a.ticker)}', \${a.weight}, '\${encodeURIComponent(a.tag)}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="deleteAsset('\${encodeURIComponent(a.ticker)}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="openEditModal('${encodeURIComponent(a.ticker)}', ${a.weight}, '${encodeURIComponent(a.tag)}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteAsset('${encodeURIComponent(a.ticker)}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>
-            \`;
+            `;
         });
         
-        html += \`</tbody></table></div></div>\`;
+        html += `</tbody></table></div></div>`;
         container.innerHTML += html;
     }
     
@@ -567,11 +567,11 @@ function renderWallet(assets, exchangeRate = 5.0) {
 
 async function deleteAsset(ticker) {
     const decodedTicker = decodeURIComponent(ticker);
-    if (confirm(\`Remove \${decodedTicker}? All associated transactions will also be permanently deleted.\`)) {
+    if (confirm(`Remove ${decodedTicker}? All associated transactions will also be permanently deleted.`)) {
         clearFeedback();
         showLoader();
         try {
-            const response = await fetch(\`/api/wallet/asset/\${decodedTicker}\`, { method: 'DELETE' });
+            const response = await fetch(`/api/wallet/asset/${decodedTicker}`, { method: 'DELETE' });
             const payload = await response.json();
             if (!response.ok) {
                 showFeedback(payload.error || 'Could not remove asset.');
@@ -597,7 +597,7 @@ async function calculateSmartBuy() {
     
     const btn = document.querySelector('button[onclick="calculateSmartBuy()"]');
     const originalText = btn.innerHTML;
-    btn.innerHTML = \`<i class="fa-solid fa-spinner fa-spin mr-2"></i> Calculating...\`;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Calculating...`;
     
     try {
         const response = await fetch('/api/smart-buy', {
@@ -642,35 +642,35 @@ async function calculateSmartBuy() {
             let rowClass = isSkip ? 'opacity-40 hover:opacity-80 transition-opacity grayscale' : 'hover:bg-dark-border/20 transition-colors';
             
             let shares = r.currency === 'BRL' ? Math.floor(r.shares_to_buy) : r.shares_to_buy.toFixed(2);
-            let sharesText = isSkip ? '-' : \`\${shares} shs\`;
-            let buyText = isSkip ? '-' : \`+\${formatCurrency(r.value_to_buy, r.currency)}\`;
+            let sharesText = isSkip ? '-' : `${shares} shs`;
+            let buyText = isSkip ? '-' : `+${formatCurrency(r.value_to_buy, r.currency)}`;
             
-            tbody.innerHTML += \`
-            <tr class="\${rowClass} border-b border-dark-border/50 last:border-0">
-                <td class="py-3 px-2 font-medium">\${r.ticker}</td>
-                <td class="py-3 px-2 text-dark-muted text-[11px] uppercase tracking-wider">\${r.tag}</td>
+            tbody.innerHTML += `
+            <tr class="${rowClass} border-b border-dark-border/50 last:border-0">
+                <td class="py-3 px-2 font-medium">${r.ticker}</td>
+                <td class="py-3 px-2 text-dark-muted text-[11px] uppercase tracking-wider">${r.tag}</td>
                 <td class="py-3 px-2 text-right">
-                    <div class="font-medium">\${current_pct.toFixed(1)}%</div>
-                    <div class="text-[10px] text-dark-muted">\${formatCurrency(r.current_value, r.currency)}</div>
+                    <div class="font-medium">${current_pct.toFixed(1)}%</div>
+                    <div class="text-[10px] text-dark-muted">${formatCurrency(r.current_value, r.currency)}</div>
                 </td>
-                <td class="py-3 px-2 text-center font-medium">\${(r.ideal_percent * 100).toFixed(1)}%</td>
+                <td class="py-3 px-2 text-center font-medium">${(r.ideal_percent * 100).toFixed(1)}%</td>
                 <td class="py-3 px-2 text-right">
-                    <div class="font-bold \${isSkip ? 'text-dark-muted' : 'text-brand-green'}">\${buyText}</div>
-                    <div class="text-[10px] \${isSkip ? 'text-dark-muted' : 'text-brand-blue'} font-medium">\${sharesText}</div>
+                    <div class="font-bold ${isSkip ? 'text-dark-muted' : 'text-brand-green'}">${buyText}</div>
+                    <div class="text-[10px] ${isSkip ? 'text-dark-muted' : 'text-brand-blue'} font-medium">${sharesText}</div>
                 </td>
                 <td class="py-3 px-2 text-right">
-                    <div class="font-medium \${isSkip ? 'text-dark-muted' : 'text-purple-400'}">\${post_inv_pct.toFixed(1)}%</div>
-                    <div class="text-[10px] \${isSkip ? 'text-dark-muted' : 'text-purple-400/70'}">\${formatCurrency(post_inv_native, r.currency)}</div>
+                    <div class="font-medium ${isSkip ? 'text-dark-muted' : 'text-purple-400'}">${post_inv_pct.toFixed(1)}%</div>
+                    <div class="text-[10px] ${isSkip ? 'text-dark-muted' : 'text-purple-400/70'}">${formatCurrency(post_inv_native, r.currency)}</div>
                 </td>
             </tr>
-            \`;
+            `;
         });
 
         const leftoverContainer = document.getElementById('leftover-container');
         if (data.leftover_brl > 0 || data.leftover_usd > 0) {
             let leftoverText = [];
-            if (data.leftover_brl > 0) leftoverText.push(\`\${formatCurrency(data.leftover_brl, 'BRL')}\`);
-            if (data.leftover_usd > 0) leftoverText.push(\`\${formatCurrency(data.leftover_usd, 'USD')}\`);
+            if (data.leftover_brl > 0) leftoverText.push(`${formatCurrency(data.leftover_brl, 'BRL')}`);
+            if (data.leftover_usd > 0) leftoverText.push(`${formatCurrency(data.leftover_usd, 'USD')}`);
             document.getElementById('leftover-amount').innerHTML = leftoverText.join(' + ');
             leftoverContainer.classList.remove('hidden');
         } else if (leftoverContainer) {

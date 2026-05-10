@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from backend.wallet import load_wallet, add_asset, update_asset, remove_asset, update_group, add_transaction, remove_transaction
+from backend.wallet import load_wallet, add_asset, update_asset, remove_asset, update_group, add_transaction, remove_transaction, build_investment_summary
 from backend.finance import get_current_prices, get_exchange_rate
 from backend.calculator import calculate_smart_buy
 from backend.validation import ValidationError, validate_asset_payload, validate_group_payload, validate_investment_payload, validate_transaction_payload
@@ -54,6 +54,7 @@ def get_wallet():
         "assets": assets,
         "groups": wallet.get('groups', {}),
         "transactions": wallet.get('transactions', []),
+        "investment_summary": build_investment_summary(wallet, exchange_rate),
         "exchange_rate": exchange_rate
     })
 

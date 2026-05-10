@@ -4,6 +4,7 @@ let walletGroups = {};
 let currentExchangeRate = 5.0;
 let globalAssets = [];
 let globalTransactions = [];
+let globalInvestmentSummary = null;
 let currentSort = { column: 'pctInGroup', direction: 'desc' };
 
 function setSort(column) {
@@ -148,7 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
             date: document.getElementById('tx-date').value,
             type: document.getElementById('tx-type').value,
             quantity: parseLocalizedNumber(document.getElementById('tx-qty').value),
-            price: parseLocalizedNumber(document.getElementById('tx-price').value)
+            price: parseLocalizedNumber(document.getElementById('tx-price').value),
+            amount: parseLocalizedNumber(document.getElementById('tx-amount').value),
+            currency: document.getElementById('tx-currency').value,
+            tag: document.getElementById('tx-tag').value,
+            weight: parseInt(document.getElementById('tx-weight').value || '0')
         };
         
         showLoader();
@@ -171,6 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
             hideLoader();
         }
     });
+
+    document.getElementById('release-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('add-release-line').addEventListener('click', () => addReleaseLine());
+    document.getElementById('release-form').addEventListener('submit', submitRelease);
+    addReleaseLine();
 });
 
 function openEditModal(ticker, weight, tag) {
@@ -225,6 +235,122 @@ function closeTxModal() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 }
 
+function categoryOptions(selected = 'BR ETFs') {
+    const categories = ['BR ETFs', 'US ETFs', 'FII', 'Ações', 'BDR', 'Stocks', 'Crypto'];
+    return categories.map(category => `<option value="${category}" ${category === selected ? 'selected' : ''}>${category}</option>`).join('');
+}
+
+function addReleaseLine(defaults = {}) {
+    const container = document.getElementById('release-lines');
+    const line = document.createElement('div');
+    line.className = 'release-line grid grid-cols-1 xl:grid-cols-[1.1fr_1fr_.8fr_1fr_1fr_1fr_.7fr_auto] gap-3 items-end p-4 border border-dark-border rounded-xl bg-dark-bg/35';
+    line.innerHTML = `
+        <div>
+            <label class="text-dark-muted text-xs font-medium mb-1 block">Ticker</label>
+            <input type="text" data-field="ticker" value="${defaults.ticker || ''}" required placeholder="IVVB11, VOO" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+        </div>
+        <div>
+            <label class="text-dark-muted text-xs font-medium mb-1 block">Category</label>
+            <select data-field="tag" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+                ${categoryOptions(defaults.tag || 'BR ETFs')}
+            </select>
+        </div>
+        <div>
+            <label class="text-dark-muted text-xs font-medium mb-1 block">Currency</label>
+            <select data-field="currency" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+                <option value="BRL" ${(defaults.currency || 'BRL') === 'BRL' ? 'selected' : ''}>BRL</option>
+                <option value="USD" ${defaults.currency === 'USD' ? 'selected' : ''}>USD</option>
+            </select>
+        </div>
+        <div>
+            <label class="text-dark-muted text-xs font-medium mb-1 block">Invested</label>
+            <input type="text" inputmode="decimal" data-field="amount" value="${defaults.amount || ''}" required placeholder="1000,00" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+        </div>
+        <div>
+            <label class="text-dark-muted text-xs font-medium mb-1 block">Unit Price</label>
+            <input type="text" inputmode="decimal" data-field="price" value="${defaults.price || ''}" required placeholder="100,00" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+        </div>
+        <div>
+            <label class="text-dark-muted text-xs font-medium mb-1 block">Quantity</label>
+            <input type="text" inputmode="decimal" data-field="quantity" value="${defaults.quantity || ''}" placeholder="auto" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+        </div>
+        <div>
+            <label class="text-dark-muted text-xs font-medium mb-1 block">Weight</label>
+            <input type="number" min="0" max="100" data-field="weight" value="${defaults.weight || 10}" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+        </div>
+        <button type="button" onclick="removeReleaseLine(this)" class="h-10 w-10 inline-flex items-center justify-center rounded-lg text-dark-muted hover:text-brand-red hover:bg-brand-red/10 transition-colors" title="Remove line">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    `;
+    container.appendChild(line);
+}
+
+function removeReleaseLine(button) {
+    const container = document.getElementById('release-lines');
+    if (container.children.length === 1) {
+        button.closest('.release-line').querySelectorAll('input').forEach(input => {
+            if (input.dataset.field !== 'weight') input.value = '';
+        });
+        return;
+    }
+    button.closest('.release-line').remove();
+}
+
+function readReleaseLine(line, date) {
+    const field = name => line.querySelector(`[data-field="${name}"]`);
+    const amount = parseLocalizedNumber(field('amount').value);
+    const price = parseLocalizedNumber(field('price').value);
+    const quantity = parseLocalizedNumber(field('quantity').value);
+    return {
+        ticker: field('ticker').value.toUpperCase(),
+        date,
+        type: 'BUY',
+        amount,
+        price,
+        quantity,
+        currency: field('currency').value,
+        tag: field('tag').value,
+        weight: parseInt(field('weight').value || '0')
+    };
+}
+
+async function submitRelease(event) {
+    event.preventDefault();
+    clearFeedback();
+    const date = document.getElementById('release-date').value;
+    const lines = [...document.querySelectorAll('.release-line')].map(line => readReleaseLine(line, date));
+    const validLines = lines.filter(line => line.ticker && line.amount > 0 && line.price >= 0);
+
+    if (!date || validLines.length === 0) {
+        showFeedback('Add at least one investment line with date, ticker, amount, and price.');
+        return;
+    }
+
+    showLoader();
+    try {
+        for (const line of validLines) {
+            const response = await fetch('/api/wallet/transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(line)
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                showFeedback(payload.error || `Could not save ${line.ticker}.`);
+                return;
+            }
+        }
+        document.getElementById('release-form').reset();
+        document.getElementById('release-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('release-lines').innerHTML = '';
+        addReleaseLine();
+        showFeedback('Monthly contribution saved.', 'success');
+        await fetchWallet();
+    } finally {
+        hideLoader();
+    }
+}
+
 function switchTab(tabId) {
     if (tabId === 'portfolio') {
         document.getElementById('portfolio-view').classList.remove('hidden');
@@ -268,8 +394,10 @@ async function fetchWallet() {
         currentExchangeRate = data.exchange_rate || 5.0;
         globalAssets = data.assets || [];
         globalTransactions = data.transactions || [];
+        globalInvestmentSummary = data.investment_summary || null;
         renderWallet(globalAssets, currentExchangeRate);
         renderTransactions(globalTransactions);
+        renderInvestmentSummary(globalInvestmentSummary);
     } catch (error) {
         console.error("Error fetching wallet", error);
         showFeedback('Error fetching wallet');
@@ -283,7 +411,7 @@ function renderTransactions(transactions) {
     tbody.innerHTML = '';
 
     if (transactions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="py-4 px-6 text-center text-dark-muted">No transactions found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="py-4 px-6 text-center text-dark-muted">No transactions found.</td></tr>';
         renderEvolutionChart([]);
         return;
     }
@@ -292,15 +420,19 @@ function renderTransactions(transactions) {
 
     sortedTxs.forEach(tx => {
         const typeClass = tx.type === 'BUY' ? 'text-brand-green' : 'text-brand-red';
-        const total = tx.quantity * tx.price;
+        const currency = tx.currency || assetCurrency(tx.ticker);
+        const total = tx.amount !== undefined ? tx.amount : tx.quantity * tx.price;
+        const asset = globalAssets.find(a => a.ticker === tx.ticker);
         tbody.innerHTML += `
             <tr class="hover:bg-dark-border/10 transition-colors">
                 <td class="py-3 px-6 whitespace-nowrap">${tx.date}</td>
                 <td class="py-3 px-6 font-medium ${typeClass}">${tx.type}</td>
                 <td class="py-3 px-6 font-medium">${tx.ticker}</td>
+                <td class="py-3 px-6 text-dark-muted">${asset ? asset.tag : (tx.tag || '-')}</td>
+                <td class="py-3 px-6">${currency}</td>
                 <td class="py-3 px-6 text-right">${tx.quantity}</td>
-                <td class="py-3 px-6 text-right">${formatCurrency(tx.price, 'BRL')}</td>
-                <td class="py-3 px-6 text-right">${formatCurrency(total, 'BRL')}</td>
+                <td class="py-3 px-6 text-right">${formatCurrency(tx.price, currency)}</td>
+                <td class="py-3 px-6 text-right">${formatCurrency(total, currency)}</td>
                 <td class="py-3 px-6 text-right">
                     <button onclick="deleteTransaction('${tx.id}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
                 </td>
@@ -314,27 +446,17 @@ function renderTransactions(transactions) {
 function renderEvolutionChart(transactions) {
     if (typeof Chart === 'undefined') return;
     const ctx = document.getElementById('evolutionChart').getContext('2d');
-    
-    const chronoTxs = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
-    
+    const monthly = globalInvestmentSummary && globalInvestmentSummary.monthly
+        ? globalInvestmentSummary.monthly
+        : buildMonthlySummaryFromTransactions(transactions);
+    const labels = monthly.map(item => item.month);
+    const brlBuys = monthly.map(item => item.buy_brl || 0);
+    const usdBuysInBrl = monthly.map(item => (item.buy_usd || 0) * currentExchangeRate);
     let accumulated = 0;
-    const monthlyData = {};
-
-    chronoTxs.forEach(tx => {
-        const d = new Date(tx.date);
-        const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        
-        const value = tx.quantity * tx.price;
-        if (tx.type === 'BUY') {
-            accumulated += value;
-        } else {
-            accumulated -= value;
-        }
-        monthlyData[monthKey] = accumulated;
+    const accumulatedData = monthly.map(item => {
+        accumulated += item.net_brl_equivalent || 0;
+        return accumulated;
     });
-
-    const labels = Object.keys(monthlyData).sort();
-    const data = labels.map(l => monthlyData[l]);
 
     if (evolutionChartInstance) {
         evolutionChartInstance.destroy();
@@ -347,12 +469,32 @@ function renderEvolutionChart(transactions) {
                 const parts = l.split('-');
                 return `${parts[1]}/${parts[0]}`;
             }),
-            datasets: [{
-                label: 'Invested Value (Aportes)',
-                data: data,
-                backgroundColor: '#10b981',
-                borderRadius: 4
-            }]
+            datasets: [
+                {
+                    label: 'BRL contributions',
+                    data: brlBuys,
+                    backgroundColor: '#10b981',
+                    borderRadius: 4,
+                    stack: 'contributions'
+                },
+                {
+                    label: 'USD contributions in BRL',
+                    data: usdBuysInBrl,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4,
+                    stack: 'contributions'
+                },
+                {
+                    label: 'Accumulated net invested',
+                    type: 'line',
+                    data: accumulatedData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: '#f59e0b',
+                    tension: 0.25,
+                    pointRadius: 3,
+                    yAxisID: 'y'
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -365,16 +507,94 @@ function renderEvolutionChart(transactions) {
             },
             scales: {
                 y: {
-                    ticks: { color: '#94a3b8' },
+                    stacked: false,
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: value => formatCurrency(value, 'BRL')
+                    },
                     grid: { color: '#334155' }
                 },
                 x: {
+                    stacked: true,
                     ticks: { color: '#94a3b8' },
                     grid: { display: false }
                 }
             }
         }
     });
+}
+
+function buildMonthlySummaryFromTransactions(transactions) {
+    const monthly = {};
+    transactions.forEach(tx => {
+        const d = new Date(tx.date);
+        const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const currency = tx.currency || assetCurrency(tx.ticker);
+        const amount = tx.amount !== undefined ? tx.amount : tx.quantity * tx.price;
+        const sign = tx.type === 'BUY' ? 1 : -1;
+        const bucket = monthly[month] || {
+            month,
+            buy_brl: 0,
+            buy_usd: 0,
+            sell_brl: 0,
+            sell_usd: 0,
+            net_brl_equivalent: 0
+        };
+        const key = `${tx.type === 'BUY' ? 'buy' : 'sell'}_${currency.toLowerCase()}`;
+        bucket[key] += amount;
+        bucket.net_brl_equivalent += sign * (currency === 'USD' ? amount * currentExchangeRate : amount);
+        monthly[month] = bucket;
+    });
+    return Object.keys(monthly).sort().map(key => monthly[key]);
+}
+
+function renderInvestmentSummary(summary) {
+    if (!summary) return;
+    const currentValue = globalAssets.reduce((sum, asset) => {
+        const rate = asset.currency === 'USD' ? currentExchangeRate : 1;
+        return sum + (asset.total_value * rate);
+    }, 0);
+    const netInvested = summary.net_invested_brl_equivalent || 0;
+    const delta = currentValue - netInvested;
+    const deltaPct = netInvested > 0 ? (delta / netInvested) * 100 : 0;
+    const lastMonth = summary.monthly && summary.monthly.length > 0 ? summary.monthly[summary.monthly.length - 1] : null;
+
+    setText('history-total-invested', formatCurrency(summary.gross_invested_brl_equivalent || 0, 'BRL'));
+    setText('history-total-usd', formatCurrency(summary.total_buy_usd || 0, 'USD'));
+    setText('history-current-delta', `${delta >= 0 ? '+' : ''}${formatCurrency(delta, 'BRL')} (${deltaPct.toFixed(1)}%)`);
+    setText('history-last-month', lastMonth ? formatCurrency(lastMonth.gross_brl_equivalent || 0, 'BRL') : formatCurrency(0, 'BRL'));
+
+    const deltaEl = document.getElementById('history-current-delta');
+    if (deltaEl) {
+        deltaEl.classList.toggle('text-brand-green', delta >= 0);
+        deltaEl.classList.toggle('text-brand-red', delta < 0);
+    }
+
+    const tbody = document.getElementById('monthly-history-body');
+    if (!tbody) return;
+    if (!summary.monthly || summary.monthly.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 px-6 text-center text-dark-muted">No monthly contributions yet.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = [...summary.monthly].reverse().map(month => `
+        <tr class="hover:bg-dark-border/10 transition-colors">
+            <td class="py-3 px-6 whitespace-nowrap">${formatMonth(month.month)}</td>
+            <td class="py-3 px-6 text-right">${formatCurrency(month.buy_brl || 0, 'BRL')}</td>
+            <td class="py-3 px-6 text-right">${formatCurrency(month.buy_usd || 0, 'USD')}</td>
+            <td class="py-3 px-6 text-right">${formatCurrency(month.gross_brl_equivalent || 0, 'BRL')}</td>
+            <td class="py-3 px-6 text-right">${formatCurrency(month.net_brl_equivalent || 0, 'BRL')}</td>
+        </tr>
+    `).join('');
+}
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.innerText = value;
+}
+
+function formatMonth(month) {
+    const [year, monthNumber] = month.split('-');
+    return `${monthNumber}/${year}`;
 }
 
 async function deleteTransaction(id) {
@@ -699,6 +919,12 @@ function formatCurrency(val, currency = 'BRL') {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
     }
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+}
+
+function assetCurrency(ticker) {
+    const asset = globalAssets.find(item => item.ticker === ticker);
+    if (asset) return asset.currency;
+    return ticker && ticker.endsWith('.SA') ? 'BRL' : 'USD';
 }
 
 function renderChart(groups, exchangeRate = 5.0) {

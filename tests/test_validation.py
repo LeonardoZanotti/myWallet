@@ -80,20 +80,46 @@ def test_validate_transaction_payload_success():
         'date': '2026-05-10',
         'type': 'BUY',
         'quantity': 1.5,
-        'price': 100.5
+        'price': 100.5,
+        'amount': 150.75
+    }
+
+def test_validate_transaction_payload_derives_quantity_from_amount():
+    payload = validate_transaction_payload({
+        'ticker': ' voo ',
+        'date': '2026-05-10',
+        'type': 'buy',
+        'amount': '250',
+        'price': '100',
+        'currency': 'usd',
+        'tag': 'US ETFs',
+        'weight': '30'
+    })
+    assert payload == {
+        'ticker': 'VOO',
+        'date': '2026-05-10',
+        'type': 'BUY',
+        'quantity': 2.5,
+        'price': 100.0,
+        'amount': 250.0,
+        'currency': 'USD',
+        'tag': 'US ETFs',
+        'weight': 30
     }
 
 @pytest.mark.parametrize('payload,error_message', [
     (None, 'Invalid JSON payload.'),
-    ({}, 'Missing required fields: ticker, date, type, quantity, price.'),
+    ({}, 'Missing required fields: ticker, date, type, price.'),
     ({'ticker': '', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 1, 'price': 1}, 'Ticker is required.'),
     ({'ticker': 'A', 'date': 'invalid', 'type': 'BUY', 'quantity': 1, 'price': 1}, 'Date must be in YYYY-MM-DD format.'),
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'INVALID', 'quantity': 1, 'price': 1}, 'Type must be BUY or SELL.'),
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 0, 'price': 1}, 'Quantity must be greater than zero.'),
-    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 1, 'price': -1}, 'Price must be zero or greater.')
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 1, 'price': -1}, 'Price must be zero or greater.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'price': 1}, 'Either quantity or amount is required.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 0}, 'Price must be greater than zero when amount is used.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'currency': 'EUR'}, 'Currency must be BRL or USD.')
 ])
 def test_validate_transaction_payload_errors(payload, error_message):
     with pytest.raises(ValidationError, match=error_message):
         validate_transaction_payload(payload)
-
 

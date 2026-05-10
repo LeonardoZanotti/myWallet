@@ -4,12 +4,13 @@
 
 `myWallet` is a local portfolio manager for mixed BRL and USD portfolios.
 
-It has four main jobs:
+It has five main jobs:
 
 1. store wallet data locally in `backend/wallet.json`
 2. fetch live prices and USD/BRL FX data
 3. render grouped wallet summaries and allocation views
 4. calculate a smart-buy recommendation for new BRL and USD cash
+5. track monthly contribution releases and investment history
 
 ## 2. Architecture
 
@@ -44,6 +45,10 @@ The application now uses an Event-Sourced (Ledger) model. `wallet.json` contains
 - `ticker`
 - `quantity`
 - `price`
+- `amount`
+- `currency` (BRL or USD)
+
+Monthly contribution releases in the UI create one BUY transaction per investment line. When a line has `amount` and `price`, the backend derives `quantity` as `amount / price`, so users can enter "R$ X into this ETF" or "$ Y into this stock" without manually calculating fractional shares.
 
 ### Asset fields
 
@@ -100,6 +105,7 @@ Returns:
 
 - assets with derived `currency`, `current_price`, `variation`, and `total_value`
 - saved group configuration
+- transactions and an `investment_summary` with monthly BRL/USD contribution totals
 - current exchange rate
 - JSON error messages when the request cannot be processed
 
@@ -122,6 +128,13 @@ Returns `404` when the asset does not exist.
 ### `POST /api/wallet/transaction`
 
 Adds a new BUY or SELL transaction to the ledger. This automatically recalculates the `quantity` and `average_price` of the associated asset. For a SELL transaction, it reduces the quantity but maintains the historical average price base.
+
+Accepted transaction payloads can provide either:
+
+- `quantity` and `price`
+- `amount` and `price`, where quantity is derived automatically
+
+Optional `currency`, `tag`, and `weight` fields let a contribution release create or update the asset metadata at the same time as the ledger entry.
 
 ### `DELETE /api/wallet/transaction/<id>`
 

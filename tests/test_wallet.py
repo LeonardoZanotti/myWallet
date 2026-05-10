@@ -74,6 +74,34 @@ def test_transactions_calculation(mock_wallet_file):
     assert loaded['assets'][0]['quantity'] == 15
     assert loaded['assets'][0]['average_price'] == 75
 
+def test_amount_transaction_creates_usd_asset_and_summary(mock_wallet_file):
+    wallet.add_transaction({
+        'ticker': 'VOO',
+        'date': '2026-05-01',
+        'type': 'BUY',
+        'amount': 250,
+        'price': 100,
+        'currency': 'USD',
+        'tag': 'US ETFs',
+        'weight': 40
+    })
+
+    loaded = wallet.load_wallet()
+    asset = loaded['assets'][0]
+    tx = loaded['transactions'][0]
+    summary = wallet.build_investment_summary(loaded, exchange_rate=5.0)
+
+    assert asset['ticker'] == 'VOO'
+    assert asset['tag'] == 'US ETFs'
+    assert asset['weight'] == 40
+    assert asset['quantity'] == 2.5
+    assert asset['average_price'] == 100
+    assert tx['currency'] == 'USD'
+    assert tx['amount'] == 250
+    assert summary['total_buy_usd'] == 250
+    assert summary['gross_invested_brl_equivalent'] == 1250
+    assert summary['monthly'][0]['month'] == '2026-05'
+
 def test_remove_transaction(mock_wallet_file):
     tx1 = wallet.add_transaction({'ticker': 'A.SA', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 10, 'price': 100})
     tx2 = wallet.add_transaction({'ticker': 'A.SA', 'date': '2026-01-02', 'type': 'BUY', 'quantity': 10, 'price': 50})

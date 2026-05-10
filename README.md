@@ -62,6 +62,8 @@ Then open `http://localhost:5000`.
 
 - Track BRL and USD assets in one wallet
 - Store assets and group targets locally
+- Record monthly contribution releases with multiple BRL/USD investment lines
+- Build portfolio balances from the investment ledger and show contribution history
 - Fetch current prices and USD/BRL exchange rate from Yahoo Finance
 - View grouped wallet totals, returns, and allocation percentages
 - Edit individual assets and group target percentages from the UI

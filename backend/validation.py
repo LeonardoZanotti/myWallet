@@ -93,7 +93,7 @@ import datetime
 def validate_transaction_payload(data):
     data = _require_mapping(data)
     cleaned = {}
-    required_fields = ['ticker', 'date', 'type', 'quantity', 'price']
+    required_fields = ['ticker', 'date', 'type', 'price']
     
     missing = [field for field in required_fields if field not in data]
     if missing:
@@ -116,15 +116,50 @@ def validate_transaction_payload(data):
         raise ValidationError('Type must be BUY or SELL.')
     cleaned['type'] = tx_type
 
-    quantity = _to_float(data.get('quantity'), 'quantity')
-    if quantity <= 0:
-        raise ValidationError('Quantity must be greater than zero.')
-    cleaned['quantity'] = quantity
-
     price = _to_float(data.get('price'), 'price')
     if price < 0:
         raise ValidationError('Price must be zero or greater.')
     cleaned['price'] = price
 
-    return cleaned
+    amount = None
+    if 'amount' in data and data.get('amount') not in ('', None):
+        amount = _to_float(data.get('amount'), 'amount')
+        if amount <= 0:
+            raise ValidationError('Amount must be greater than zero.')
 
+    quantity = None
+    if 'quantity' in data and data.get('quantity') not in ('', None):
+        quantity = _to_float(data.get('quantity'), 'quantity')
+        if quantity <= 0:
+            raise ValidationError('Quantity must be greater than zero.')
+
+    if quantity is None and amount is None:
+        raise ValidationError('Either quantity or amount is required.')
+
+    if quantity is None:
+        if price <= 0:
+            raise ValidationError('Price must be greater than zero when amount is used.')
+        quantity = amount / price
+
+    cleaned['quantity'] = quantity
+    cleaned['amount'] = amount if amount is not None else quantity * price
+
+    if 'currency' in data and data.get('currency') not in ('', None):
+        currency = str(data.get('currency', '')).strip().upper()
+        if currency not in ('BRL', 'USD'):
+            raise ValidationError('Currency must be BRL or USD.')
+        cleaned['currency'] = currency
+
+    if 'tag' in data and data.get('tag') not in ('', None):
+        tag = str(data.get('tag', '')).strip()
+        if not tag:
+            raise ValidationError('Category is required.')
+        cleaned['tag'] = tag
+
+    if 'weight' in data and data.get('weight') not in ('', None):
+        weight = _to_int(data.get('weight'), 'weight')
+        if weight < 0 or weight > 100:
+            raise ValidationError('Weight must be between 0 and 100.')
+        cleaned['weight'] = weight
+
+    return cleaned

@@ -103,7 +103,7 @@ def test_create_transaction(mock_add, client):
 def test_create_transaction_validation_error(mock_add, client):
     response = client.post('/api/wallet/transaction', json={})
     assert response.status_code == 400
-    assert response.get_json()['error'] == 'Missing required fields: ticker, date, type, quantity, price.'
+    assert response.get_json()['error'] == 'Missing required fields: ticker, date, type, price.'
     mock_add.assert_not_called()
 
 @patch('backend.app.remove_transaction')

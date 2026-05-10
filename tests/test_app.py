@@ -85,10 +85,40 @@ def test_create_asset(mock_add, client):
 
 @patch('backend.app.add_asset')
 def test_create_asset_validation_error(mock_add, client):
-    response = client.post('/api/wallet/asset', json={'ticker': '', 'quantity': -1})
+    response = client.post('/api/wallet/asset', json={'ticker': ''})
     assert response.status_code == 400
-    assert response.get_json()['error'] == 'Missing required fields: average_price, weight, tag.'
+    assert response.get_json()['error'] == 'Missing required fields: weight, tag.'
     mock_add.assert_not_called()
+
+@patch('backend.app.add_transaction')
+def test_create_transaction(mock_add, client):
+    mock_add.return_value = {'id': '123'}
+    response = client.post('/api/wallet/transaction', json={
+        'ticker': 'A.SA', 'date': '2026-05-10', 'type': 'BUY', 'quantity': 10, 'price': 100
+    })
+    assert response.status_code == 201
+    assert response.get_json() == {'id': '123'}
+
+@patch('backend.app.add_transaction')
+def test_create_transaction_validation_error(mock_add, client):
+    response = client.post('/api/wallet/transaction', json={})
+    assert response.status_code == 400
+    assert response.get_json()['error'] == 'Missing required fields: ticker, date, type, quantity, price.'
+    mock_add.assert_not_called()
+
+@patch('backend.app.remove_transaction')
+def test_delete_transaction(mock_remove, client):
+    mock_remove.return_value = True
+    response = client.delete('/api/wallet/transaction/123')
+    assert response.status_code == 200
+    assert response.get_json() == {"status": "success"}
+
+@patch('backend.app.remove_transaction')
+def test_delete_transaction_not_found(mock_remove, client):
+    mock_remove.return_value = False
+    response = client.delete('/api/wallet/transaction/123')
+    assert response.status_code == 404
+    assert response.get_json()['error'] == 'Transaction not found.'
 
 @patch('backend.app.update_asset')
 def test_edit_asset(mock_update, client):

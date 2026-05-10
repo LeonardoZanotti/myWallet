@@ -25,7 +25,7 @@ def _to_int(value, field_name):
 def validate_asset_payload(data, partial=False):
     data = _require_mapping(data)
     cleaned = {}
-    required_fields = ['ticker', 'quantity', 'average_price', 'weight', 'tag']
+    required_fields = ['ticker', 'weight', 'tag']
 
     if not partial:
         missing = [field for field in required_fields if field not in data]
@@ -38,17 +38,6 @@ def validate_asset_payload(data, partial=False):
             raise ValidationError('Ticker is required.')
         cleaned['ticker'] = ticker
 
-    if 'quantity' in data:
-        quantity = _to_float(data.get('quantity'), 'quantity')
-        if quantity < 0:
-            raise ValidationError('Quantity must be zero or greater.')
-        cleaned['quantity'] = quantity
-
-    if 'average_price' in data:
-        average_price = _to_float(data.get('average_price'), 'average_price')
-        if average_price < 0:
-            raise ValidationError('Average price must be zero or greater.')
-        cleaned['average_price'] = average_price
 
     if 'weight' in data:
         weight = _to_int(data.get('weight'), 'weight')
@@ -99,4 +88,43 @@ def validate_investment_payload(data):
     return {'invest_brl': invest_brl, 'invest_usd': invest_usd}
 
 
+import datetime
+
+def validate_transaction_payload(data):
+    data = _require_mapping(data)
+    cleaned = {}
+    required_fields = ['ticker', 'date', 'type', 'quantity', 'price']
+    
+    missing = [field for field in required_fields if field not in data]
+    if missing:
+        raise ValidationError(f'Missing required fields: {", ".join(missing)}.')
+
+    ticker = str(data.get('ticker', '')).strip().upper()
+    if not ticker:
+        raise ValidationError('Ticker is required.')
+    cleaned['ticker'] = ticker
+
+    date_str = str(data.get('date', '')).strip()
+    try:
+        datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        cleaned['date'] = date_str
+    except ValueError:
+        raise ValidationError('Date must be in YYYY-MM-DD format.')
+
+    tx_type = str(data.get('type', '')).strip().upper()
+    if tx_type not in ('BUY', 'SELL'):
+        raise ValidationError('Type must be BUY or SELL.')
+    cleaned['type'] = tx_type
+
+    quantity = _to_float(data.get('quantity'), 'quantity')
+    if quantity <= 0:
+        raise ValidationError('Quantity must be greater than zero.')
+    cleaned['quantity'] = quantity
+
+    price = _to_float(data.get('price'), 'price')
+    if price < 0:
+        raise ValidationError('Price must be zero or greater.')
+    cleaned['price'] = price
+
+    return cleaned
 

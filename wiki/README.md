@@ -35,15 +35,26 @@ It has four main jobs:
 
 ## 3. Data model
 
-### Asset fields
+### Transaction fields (Ledger)
 
-Each asset in `wallet.json` is expected to carry:
-
+The application now uses an Event-Sourced (Ledger) model. `wallet.json` contains a `transactions` array, which is the single source of truth for quantity and average price. Each transaction has:
+- `id`
+- `date`
+- `type` (BUY or SELL)
 - `ticker`
 - `quantity`
-- `average_price`
+- `price`
+
+### Asset fields
+
+Each asset in `wallet.json` is a cached view of the ledger. User-configurable fields:
+- `ticker`
 - `weight`
 - `tag`
+
+Derived/Cached fields calculated automatically from transactions:
+- `quantity`
+- `average_price`
 
 Derived fields added at runtime include:
 
@@ -94,21 +105,27 @@ Returns:
 
 ### `POST /api/wallet/asset`
 
-Adds a new asset. If the ticker already exists, quantity is merged and average price becomes a weighted average:
-
-`new_average_price = ((old_qty * old_avg) + (new_qty * new_avg)) / (old_qty + new_qty)`
+Adds a new asset metadata. If the ticker already exists, it updates `weight` and `tag`.
 
 ### `PUT /api/wallet/asset/<ticker>`
 
-Overwrites any provided asset fields.
+Overwrites any provided asset fields (`weight` or `tag`).
 
 Returns `404` when the asset does not exist.
 
 ### `DELETE /api/wallet/asset/<ticker>`
 
-Removes the asset.
+Removes the asset and permanently deletes all associated transactions.
 
 Returns `404` when the asset does not exist.
+
+### `POST /api/wallet/transaction`
+
+Adds a new BUY or SELL transaction to the ledger. This automatically recalculates the `quantity` and `average_price` of the associated asset. For a SELL transaction, it reduces the quantity but maintains the historical average price base.
+
+### `DELETE /api/wallet/transaction/<id>`
+
+Removes a transaction and recalculates the asset's state.
 
 ### `PUT /api/wallet/group/<tag>`
 

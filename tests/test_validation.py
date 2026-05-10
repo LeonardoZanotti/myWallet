@@ -9,22 +9,19 @@ from backend.validation import (
     validate_asset_payload,
     validate_group_payload,
     validate_investment_payload,
+    validate_transaction_payload
 )
 
 
 def test_validate_asset_payload_success():
     payload = validate_asset_payload({
         'ticker': 'voo',
-        'quantity': '1.5',
-        'average_price': '100',
         'weight': '40',
         'tag': 'US ETFs',
         'manual_price': ''
     })
     assert payload == {
         'ticker': 'VOO',
-        'quantity': 1.5,
-        'average_price': 100.0,
         'weight': 40,
         'tag': 'US ETFs',
         'manual_price': None
@@ -33,12 +30,11 @@ def test_validate_asset_payload_success():
 
 @pytest.mark.parametrize('payload,error_message', [
     (None, 'Invalid JSON payload.'),
-    ({'ticker': ''}, 'Missing required fields: quantity, average_price, weight, tag.'),
-    ({'ticker': 'A', 'quantity': -1, 'average_price': 1, 'weight': 10, 'tag': 'Ações'}, 'Quantity must be zero or greater.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': -1, 'weight': 10, 'tag': 'Ações'}, 'Average price must be zero or greater.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'weight': 101, 'tag': 'Ações'}, 'Weight must be between 0 and 100.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'weight': 10, 'tag': ''}, 'Category is required.'),
-    ({'ticker': 'A', 'quantity': 1, 'average_price': 1, 'weight': 10, 'tag': 'Ações', 'manual_price': -1}, 'Manual price must be zero or greater.'),
+    ({}, 'Missing required fields: ticker, weight, tag.'),
+    ({'ticker': '', 'weight': 10, 'tag': 'Ações'}, 'Ticker is required.'),
+    ({'ticker': 'A', 'weight': 101, 'tag': 'Ações'}, 'Weight must be between 0 and 100.'),
+    ({'ticker': 'A', 'weight': 10, 'tag': ''}, 'Category is required.'),
+    ({'ticker': 'A', 'weight': 10, 'tag': 'Ações', 'manual_price': -1}, 'Manual price must be zero or greater.'),
 ])
 def test_validate_asset_payload_errors(payload, error_message):
     with pytest.raises(ValidationError, match=error_message):
@@ -71,5 +67,33 @@ def test_validate_investment_payload():
     with pytest.raises(ValidationError, match='invest_brl must be a number.'):
         validate_investment_payload({'invest_brl': 'nope', 'invest_usd': 0})
 
+def test_validate_transaction_payload_success():
+    payload = validate_transaction_payload({
+        'ticker': ' voo ',
+        'date': '2026-05-10',
+        'type': 'buy',
+        'quantity': '1.5',
+        'price': '100.5'
+    })
+    assert payload == {
+        'ticker': 'VOO',
+        'date': '2026-05-10',
+        'type': 'BUY',
+        'quantity': 1.5,
+        'price': 100.5
+    }
+
+@pytest.mark.parametrize('payload,error_message', [
+    (None, 'Invalid JSON payload.'),
+    ({}, 'Missing required fields: ticker, date, type, quantity, price.'),
+    ({'ticker': '', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 1, 'price': 1}, 'Ticker is required.'),
+    ({'ticker': 'A', 'date': 'invalid', 'type': 'BUY', 'quantity': 1, 'price': 1}, 'Date must be in YYYY-MM-DD format.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'INVALID', 'quantity': 1, 'price': 1}, 'Type must be BUY or SELL.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 0, 'price': 1}, 'Quantity must be greater than zero.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'quantity': 1, 'price': -1}, 'Price must be zero or greater.')
+])
+def test_validate_transaction_payload_errors(payload, error_message):
+    with pytest.raises(ValidationError, match=error_message):
+        validate_transaction_payload(payload)
 
 

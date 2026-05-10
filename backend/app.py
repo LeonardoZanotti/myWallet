@@ -1,10 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from backend.wallet import load_wallet, add_asset, update_asset, remove_asset, update_group
+from backend.wallet import load_wallet, add_asset, update_asset, remove_asset, update_group, add_transaction, remove_transaction
 from backend.finance import get_current_prices, get_exchange_rate
 from backend.calculator import calculate_smart_buy
-from backend.validation import ValidationError, validate_asset_payload, validate_group_payload, validate_investment_payload
+from backend.validation import ValidationError, validate_asset_payload, validate_group_payload, validate_investment_payload, validate_transaction_payload
 from backend.config import BRL_CATEGORIES, USD_CATEGORIES
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
@@ -53,6 +53,7 @@ def get_wallet():
     return jsonify({
         "assets": assets,
         "groups": wallet.get('groups', {}),
+        "transactions": wallet.get('transactions', []),
         "exchange_rate": exchange_rate
     })
 
@@ -98,6 +99,25 @@ def edit_group(tag):
 
     group = update_group(tag, update_data)
     return jsonify(group)
+
+
+@app.route('/api/wallet/transaction', methods=['POST'])
+def create_transaction():
+    try:
+        tx_data = validate_transaction_payload(request.json or {})
+    except ValidationError as exc:
+        return json_error(str(exc))
+
+    tx = add_transaction(tx_data)
+    return jsonify(tx), 201
+
+
+@app.route('/api/wallet/transaction/<tx_id>', methods=['DELETE'])
+def delete_transaction(tx_id):
+    removed = remove_transaction(tx_id)
+    if not removed:
+        return json_error('Transaction not found.', 404)
+    return jsonify({"status": "success"})
 
 
 @app.route('/api/smart-buy', methods=['POST'])

@@ -307,16 +307,16 @@ function renderWallet(assets, exchangeRate = 5.0) {
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-dark-muted text-xs uppercase tracking-wider border-b border-dark-border bg-dark-bg/10">
-                            <th class="py-3 px-6 cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('ticker')">Asset ${sortIcon('ticker')}</th>
-                            <th class="py-3 px-6">Qty</th>
-                            <th class="py-3 px-6">Avg Price</th>
-                            <th class="py-3 px-6">Current</th>
-                            <th class="py-3 px-6">Variation</th>
-                            <th class="py-3 px-6">Value</th>
-                            <th class="py-3 px-6 text-center cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('weight')">Weight ${sortIcon('weight')}</th>
-                            <th class="py-3 px-6 text-right cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('pctInGroup')">% Group ${sortIcon('pctInGroup')}</th>
-                            <th class="py-3 px-6 text-right whitespace-nowrap">% Wallet</th>
-                            <th class="py-3 px-6 text-right sticky right-0 z-10 sticky-col-header bg-dark-bg/30">Actions</th>
+                            <th class="py-3 px-3 cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('ticker')">Asset ${sortIcon('ticker')}</th>
+                            <th class="py-3 px-3">Qty</th>
+                            <th class="py-3 px-3">Avg Price</th>
+                            <th class="py-3 px-3">Current</th>
+                            <th class="py-3 px-3">Variation</th>
+                            <th class="py-3 px-3">Value</th>
+                            <th class="py-3 px-3 text-center cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('weight')">Weight ${sortIcon('weight')}</th>
+                            <th class="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors whitespace-nowrap" onclick="setSort('pctInGroup')">% Group ${sortIcon('pctInGroup')}</th>
+                            <th class="py-3 px-3 text-right whitespace-nowrap">% Wallet</th>
+                            <th class="py-3 px-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm divide-y divide-dark-border">
@@ -359,20 +359,20 @@ function renderWallet(assets, exchangeRate = 5.0) {
             
             html += `
             <tr class="asset-row">
-                <td class="py-3 px-6 font-medium">${a.ticker}</td>
-                <td class="py-3 px-6">${a.quantity}</td>
-                <td class="py-3 px-6">${formatCurrency(a.average_price, a.currency)}</td>
-                <td class="py-3 px-6">${priceText}</td>
-                <td class="py-3 px-6">
+                <td class="py-3 px-3 font-medium">${a.ticker}</td>
+                <td class="py-3 px-3">${a.quantity}</td>
+                <td class="py-3 px-3">${formatCurrency(a.average_price, a.currency)}</td>
+                <td class="py-3 px-3">${priceText}</td>
+                <td class="py-3 px-3">
                     <span class="${isPositive ? 'variation-positive' : 'variation-negative'} inline-flex items-center text-xs font-semibold">
                         ${isPositive ? '+' : ''}${a.variation.toFixed(2)}%
                     </span>
                 </td>
-                <td class="py-3 px-6 font-medium">${formatCurrency(a.total_value, a.currency)}</td>
-                <td class="py-3 px-6 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.weight}</span></td>
-                <td class="py-3 px-6 text-right font-medium text-white">${a.pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
-                <td class="py-3 px-6 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInWallet.toFixed(1)}%</span></td>
-                <td class="py-3 px-6 text-right sticky right-0 z-10 sticky-col-cell">
+                <td class="py-3 px-3 font-medium">${formatCurrency(a.total_value, a.currency)}</td>
+                <td class="py-3 px-3 text-center"><span class="bg-dark-border px-2 py-1 rounded text-xs">${a.weight}</span></td>
+                <td class="py-3 px-3 text-right font-medium text-white">${a.pctInGroup.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInGroup.toFixed(1)}%</span></td>
+                <td class="py-3 px-3 text-right font-medium text-purple-400">${aPctInWallet.toFixed(1)}% <span class="text-dark-muted font-normal text-[11px] ml-1">/ ${targetPctInWallet.toFixed(1)}%</span></td>
+                <td class="py-3 px-3 text-right">
                     <button onclick="openEditModal('${encodeURIComponent(a.ticker)}', ${a.quantity}, ${a.average_price}, ${a.weight}, '${encodeURIComponent(a.tag)}')" class="text-brand-blue hover:text-blue-400 transition-colors mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="deleteAsset('${encodeURIComponent(a.ticker)}')" class="text-dark-muted hover:text-brand-red transition-colors"><i class="fa-solid fa-trash"></i></button>
                 </td>

@@ -162,4 +162,10 @@ def validate_transaction_payload(data):
             raise ValidationError('Weight must be between 0 and 100.')
         cleaned['weight'] = weight
 
+    if 'historical_fx' in data and data.get('historical_fx') not in ('', None):
+        historical_fx = _to_float(data.get('historical_fx'), 'historical_fx')
+        if historical_fx <= 0:
+            raise ValidationError('Historical FX must be greater than zero.')
+        cleaned['historical_fx'] = historical_fx
+
     return cleaned

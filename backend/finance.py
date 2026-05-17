@@ -46,3 +46,19 @@ def get_exchange_rate():
     except Exception as e:
         print(f"Error fetching exchange rate: {e}")
     return 5.0  # Fallback exchange rate
+
+import datetime
+
+def get_historical_exchange_rate(date_str):
+    """Fetches the USD to BRL exchange rate for a specific date."""
+    try:
+        ticker = yf.Ticker("BRL=X")
+        date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        end_obj = date_obj + datetime.timedelta(days=5) # 5 days to hit a weekday
+        end_str = end_obj.strftime('%Y-%m-%d')
+        hist = ticker.history(start=date_str, end=end_str)
+        if not hist.empty:
+            return float(hist['Close'].iloc[0])
+    except Exception as e:
+        print(f"Error fetching historical exchange rate for {date_str}: {e}")
+    return get_exchange_rate()

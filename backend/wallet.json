@@ -397,7 +397,8 @@
             "price": 27.23,
             "amount": 27.23,
             "currency": "USD",
-            "date": "2026-04-20"
+            "date": "2026-04-20",
+            "historical_fx": 5.0063
         },
         {
             "id": "f8c54fdb-bee3-5cc9-984d-ef220e7c30d8",
@@ -408,7 +409,8 @@
             "price": 42.62,
             "amount": 50.143298595599994,
             "currency": "USD",
-            "date": "2026-04-20"
+            "date": "2026-04-20",
+            "historical_fx": 5.0063
         },
         {
             "id": "87ee86e2-bc85-5e2d-b686-b00c46764a42",
@@ -419,7 +421,8 @@
             "price": 150.37,
             "amount": 167.23110087749998,
             "currency": "USD",
-            "date": "2026-04-20"
+            "date": "2026-04-20",
+            "historical_fx": 5.0063
         },
         {
             "id": "d16d79c7-e67b-5442-af2e-a61e18981704",
@@ -430,7 +433,8 @@
             "price": 646.78,
             "amount": 125.297487839,
             "currency": "USD",
-            "date": "2026-04-20"
+            "date": "2026-04-20",
+            "historical_fx": 5.0063
         },
         {
             "id": "d46bb93f-92ad-594c-ad29-f76003462e56",
@@ -441,7 +445,8 @@
             "price": 712.1,
             "amount": 123.01084573800001,
             "currency": "USD",
-            "date": "2026-04-20"
+            "date": "2026-04-20",
+            "historical_fx": 5.0063
         },
         {
             "id": "bfbdde6b-29c3-5739-af6e-7bf43561ecf7",
@@ -595,7 +600,8 @@
             "price": 26.43,
             "amount": 26.43,
             "currency": "USD",
-            "date": "2026-04-28"
+            "date": "2026-04-28",
+            "historical_fx": 4.9996
         },
         {
             "id": "0a08f499-f39c-550c-a2e0-ce9b19843058",
@@ -694,7 +700,8 @@
             "price": 149.84188196491235,
             "amount": 256.2296181600001,
             "currency": "USD",
-            "date": "2026-04-28"
+            "date": "2026-04-28",
+            "historical_fx": 4.9996
         },
         {
             "id": "ae916ba5-c5dc-579c-8ad4-fd9c0dfa6119",
@@ -705,7 +712,8 @@
             "price": 719.6120470269564,
             "amount": 165.51077081619997,
             "currency": "USD",
-            "date": "2026-04-28"
+            "date": "2026-04-28",
+            "historical_fx": 4.9996
         },
         {
             "id": "31df3ced-a92c-5cf5-b19f-c0d45d6b6e34",
@@ -716,7 +724,8 @@
             "price": 657.7693245363637,
             "amount": 72.35462569900001,
             "currency": "USD",
-            "date": "2026-04-28"
+            "date": "2026-04-28",
+            "historical_fx": 4.9996
         },
         {
             "id": "bb089b81-27d5-5291-928f-bdfec9b78a7d",
@@ -727,7 +736,8 @@
             "price": 43.24681121666668,
             "amount": 46.706556114000016,
             "currency": "USD",
-            "date": "2026-04-28"
+            "date": "2026-04-28",
+            "historical_fx": 4.9996
         }
     ]
 }

@@ -115,7 +115,8 @@ def test_transactions_calculation(mock_wallet_file):
     assert loaded['assets'][0]['quantity'] == 15
     assert loaded['assets'][0]['average_price'] == 75
 
-def test_amount_transaction_creates_usd_asset_and_summary(mock_wallet_file):
+@patch('backend.finance.get_historical_exchange_rate', return_value=5.0)
+def test_amount_transaction_creates_usd_asset_and_summary(mock_fx, mock_wallet_file):
     wallet.add_transaction({
         'ticker': 'VOO',
         'date': '2026-05-01',

@@ -43,6 +43,10 @@ def _normalize_transaction(tx, assets_by_ticker):
         asset = assets_by_ticker.get(tx['ticker'], {'ticker': tx['ticker'], 'tag': tx.get('tag', '')})
         currency = _detect_currency(asset)
     tx['currency'] = currency
+
+    if 'historical_fx' in tx and tx['historical_fx'] not in ('', None):
+        tx['historical_fx'] = float(tx['historical_fx'])
+        
     return tx
 
 def _recalculate_all_asset_states(wallet):
@@ -157,9 +161,13 @@ def recalculate_asset_state(ticker, wallet):
     return None
 
 def add_transaction(tx_data):
+    from backend.finance import get_historical_exchange_rate
     wallet = load_wallet()
     assets_by_ticker = {asset['ticker']: asset for asset in wallet.get('assets', [])}
     _normalize_transaction(tx_data, assets_by_ticker)
+
+    if tx_data['currency'] == 'USD' and ('historical_fx' not in tx_data or not tx_data['historical_fx']):
+        tx_data['historical_fx'] = get_historical_exchange_rate(tx_data['date'])
 
     tx_data['id'] = str(uuid.uuid4())
     wallet['transactions'].append(tx_data)
@@ -220,14 +228,17 @@ def build_investment_summary(wallet, exchange_rate=5.0):
         sign = 1 if kind == 'buy' else -1
         month = str(tx.get('date', ''))[:7]
         native_key = f'{kind}_{currency.lower()}'
+        
+        tx_fx = tx.get('historical_fx') or exchange_rate
+        brl_eq = amount if currency == 'BRL' else amount * tx_fx
 
         if tx.get('type') == 'BUY':
             summary[f'total_buy_{currency.lower()}'] += amount
-            summary['gross_invested_brl_equivalent'] += amount if currency == 'BRL' else amount * exchange_rate
+            summary['gross_invested_brl_equivalent'] += brl_eq
         else:
             summary[f'total_sell_{currency.lower()}'] += amount
 
-        summary['net_invested_brl_equivalent'] += sign * (amount if currency == 'BRL' else amount * exchange_rate)
+        summary['net_invested_brl_equivalent'] += sign * brl_eq
 
         if month:
             bucket = monthly.setdefault(month, {
@@ -240,9 +251,9 @@ def build_investment_summary(wallet, exchange_rate=5.0):
                 'gross_brl_equivalent': 0.0
             })
             bucket[native_key] += amount
-            bucket['net_brl_equivalent'] += sign * (amount if currency == 'BRL' else amount * exchange_rate)
+            bucket['net_brl_equivalent'] += sign * brl_eq
             if tx.get('type') == 'BUY':
-                bucket['gross_brl_equivalent'] += amount if currency == 'BRL' else amount * exchange_rate
+                bucket['gross_brl_equivalent'] += brl_eq
 
         asset_bucket = by_asset.setdefault(ticker, {
             'ticker': ticker,

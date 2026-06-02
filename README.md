@@ -84,6 +84,7 @@ Then open `http://localhost:5000`.
 
 - Group targets are normalized across all groups that exist in the wallet.
 - Asset `weight` values are normalized only inside their own group.
+- **Buy the Dip Modifier**: If an asset's current price is below its average price, its weight is temporarily boosted by 25% of the price drop ratio to prioritize purchasing undervalued assets.
 - BRL cash is invested only into BRL assets; USD cash is invested only into USD assets.
 - USD recommendations can be fractional shares.
 - BRL recommendations are rounded down to whole shares, then a greedy leftover pass tries to spend the remaining BRL on the most under-allocated eligible asset.

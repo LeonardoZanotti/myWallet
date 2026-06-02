@@ -83,3 +83,36 @@ def test_get_exchange_rate_exception(mock_ticker):
     mock_ticker.side_effect = Exception("API error")
     rate = get_exchange_rate()
     assert rate == 5.0 # Fallback
+
+from backend.finance import get_historical_exchange_rate
+
+@patch('backend.finance.yf.Ticker')
+def test_get_historical_exchange_rate_success(mock_ticker):
+    mock_instance = MagicMock()
+    mock_df = pd.DataFrame({'Close': [5.25, 5.26]})
+    mock_instance.history.return_value = mock_df
+    mock_ticker.return_value = mock_instance
+    
+    rate = get_historical_exchange_rate('2026-05-10')
+    assert rate == 5.25
+    mock_ticker.assert_called_with("BRL=X")
+
+@patch('backend.finance.yf.Ticker')
+@patch('backend.finance.get_exchange_rate')
+def test_get_historical_exchange_rate_empty(mock_get_exch, mock_ticker):
+    mock_instance = MagicMock()
+    mock_instance.history.return_value = pd.DataFrame()
+    mock_ticker.return_value = mock_instance
+    mock_get_exch.return_value = 5.0
+    
+    rate = get_historical_exchange_rate('2026-05-10')
+    assert rate == 5.0
+
+@patch('backend.finance.yf.Ticker')
+@patch('backend.finance.get_exchange_rate')
+def test_get_historical_exchange_rate_exception(mock_get_exch, mock_ticker):
+    mock_ticker.side_effect = Exception("API error")
+    mock_get_exch.return_value = 5.0
+    
+    rate = get_historical_exchange_rate('2026-05-10')
+    assert rate == 5.0

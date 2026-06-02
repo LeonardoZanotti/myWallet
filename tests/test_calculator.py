@@ -188,3 +188,11 @@ def test_smart_buy_respects_normalized_group_targets():
     by_ticker = {asset['ticker']: asset for asset in results}
     assert by_ticker['BR.SA']['ideal_percent'] == pytest.approx(0.6)
     assert by_ticker['VOO']['ideal_percent'] == pytest.approx(0.4)
+
+def test_smart_buy_price_below_average():
+    assets = [
+        {'ticker': 'A.SA', 'quantity': 10, 'average_price': 100, 'weight': 50, 'tag': 'Ações'}
+    ]
+    prices = {'A.SA': 80} # 20% drop -> ratio 1.25 -> dampened ratio 1 + (0.25 * 0.25) = 1.0625
+    results, _, _ = calculate_smart_buy(assets, prices, invest_brl=100, invest_usd=0)
+    assert results[0]['weight'] == 50 * 1.0625

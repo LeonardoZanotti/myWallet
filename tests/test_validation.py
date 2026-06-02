@@ -107,6 +107,17 @@ def test_validate_transaction_payload_derives_quantity_from_amount():
         'weight': 30
     }
 
+def test_validate_transaction_payload_historical_fx():
+    payload = validate_transaction_payload({
+        'ticker': ' voo ',
+        'date': '2026-05-10',
+        'type': 'buy',
+        'amount': '250',
+        'price': '100',
+        'historical_fx': '5.2'
+    })
+    assert payload['historical_fx'] == 5.2
+
 @pytest.mark.parametrize('payload,error_message', [
     (None, 'Invalid JSON payload.'),
     ({}, 'Missing required fields: ticker, date, type, price.'),
@@ -120,7 +131,9 @@ def test_validate_transaction_payload_derives_quantity_from_amount():
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 0}, 'Price must be greater than zero when amount is used.'),
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'currency': 'EUR'}, 'Currency must be BRL or USD.'),
     ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'tag': '   '}, 'Category is required.'),
-    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'weight': 101}, 'Weight must be between 0 and 100.')
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'weight': 101}, 'Weight must be between 0 and 100.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'historical_fx': 0}, 'Historical FX must be greater than zero.'),
+    ({'ticker': 'A', 'date': '2026-01-01', 'type': 'BUY', 'amount': 10, 'price': 1, 'historical_fx': -1}, 'Historical FX must be greater than zero.'),
 ])
 def test_validate_transaction_payload_errors(payload, error_message):
     with pytest.raises(ValidationError, match=error_message):

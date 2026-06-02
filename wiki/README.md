@@ -188,7 +188,7 @@ Selenium tests assert the rendered history and chart data for ledger fixtures.
 
 The calculator receives active assets, current prices, BRL cash, USD cash, group targets, and exchange rate.
 
-1. Prepare each asset with current price, native value, BRL-equivalent value, currency, and group.
+1. Prepare each asset with current price, native value, BRL-equivalent value, currency, and group. If the current price is below the average price, a "buy the dip" modifier is applied, temporarily boosting the asset's weight by 25% of the price drop ratio to prioritize undervalued assets.
 2. Compute future wallet value:
 
    `new_total_brl = current_total_brl + invest_brl + invest_usd * exchange_rate`

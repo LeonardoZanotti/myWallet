@@ -25,7 +25,7 @@ def get_current_prices(assets):
                 
             ticker_obj = yf.Ticker(query_ticker)
             try:
-                hist = ticker_obj.history(period="1d")
+                hist = ticker_obj.history(period="5d")
                 if not hist.empty:
                     prices[ticker] = float(hist['Close'].iloc[-1])
                 else:
@@ -40,7 +40,7 @@ def get_exchange_rate():
     """Fetches the current USD to BRL exchange rate."""
     try:
         ticker = yf.Ticker("USDBRL=X")
-        hist = ticker.history(period="1d")
+        hist = ticker.history(period="5d")
         if not hist.empty:
             return float(hist['Close'].iloc[-1])
     except Exception as e:

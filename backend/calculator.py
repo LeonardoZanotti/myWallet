@@ -17,6 +17,18 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0, 
         asset_copy['current_price'] = price
         asset_copy['current_value_native'] = asset_copy['quantity'] * price
         
+        # Adjust weight if the asset is currently cheaper than the average price
+        original_weight = float(asset_copy.get('weight', 0))
+        avg_price = float(asset_copy.get('average_price', 0))
+        
+        if avg_price > 0 and price > 0 and price < avg_price:
+            ratio = avg_price / price
+            # Suaviza o impacto da queda (aplica apenas 25% do aumento percentual)
+            dampened_ratio = 1 + ((ratio - 1) * 0.25)
+            asset_copy['weight'] = original_weight * dampened_ratio
+        else:
+            asset_copy['weight'] = original_weight
+            
         tag = asset_copy.get('tag', 'Outros')
         
         is_brl = tag in BRL_CATEGORIES
@@ -30,7 +42,7 @@ def calculate_smart_buy(assets, current_prices, invest_brl=0.0, invest_usd=0.0, 
         
         groups[tag]['assets'].append(asset_copy)
         groups[tag]['current_value_brl'] += asset_copy['current_value_brl']
-        groups[tag]['total_asset_weight'] += float(asset_copy.get('weight', 0))
+        groups[tag]['total_asset_weight'] += asset_copy['weight']
 
     if not assets or (invest_brl <= 0 and invest_usd <= 0):
         for a in assets:

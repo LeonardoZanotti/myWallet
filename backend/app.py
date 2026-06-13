@@ -6,6 +6,7 @@ from backend.finance import get_current_prices, get_exchange_rate
 from backend.calculator import calculate_smart_buy
 from backend.validation import ValidationError, validate_asset_payload, validate_group_payload, validate_investment_payload, validate_transaction_payload
 from backend.config import BRL_CATEGORIES
+from backend.proventos import calculate_proventos
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 CORS(app)
@@ -62,6 +63,14 @@ def get_wallet():
         "investment_summary": build_investment_summary(wallet, exchange_rate),
         "exchange_rate": exchange_rate
     })
+
+
+@app.route('/api/wallet/proventos', methods=['GET'])
+def get_proventos():
+    wallet = load_wallet()
+    exchange_rate = get_exchange_rate()
+    proventos_summary = calculate_proventos(wallet, exchange_rate)
+    return jsonify(proventos_summary)
 
 
 @app.route('/api/wallet/asset', methods=['POST'])

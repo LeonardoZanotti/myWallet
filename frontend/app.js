@@ -352,21 +352,22 @@ async function submitRelease(event) {
 }
 
 function switchTab(tabId) {
-    if (tabId === 'portfolio') {
-        document.getElementById('portfolio-view').classList.remove('hidden');
-        document.getElementById('transactions-view').classList.add('hidden');
-        document.getElementById('tab-portfolio').classList.add('text-brand-blue', 'border-brand-blue');
-        document.getElementById('tab-portfolio').classList.remove('text-dark-muted', 'hover:text-white', 'border-transparent');
-        document.getElementById('tab-transactions').classList.remove('text-brand-blue', 'border-brand-blue');
-        document.getElementById('tab-transactions').classList.add('text-dark-muted', 'hover:text-white', 'border-transparent');
-    } else {
-        document.getElementById('portfolio-view').classList.add('hidden');
-        document.getElementById('transactions-view').classList.remove('hidden');
-        document.getElementById('tab-transactions').classList.add('text-brand-blue', 'border-brand-blue');
-        document.getElementById('tab-transactions').classList.remove('text-dark-muted', 'hover:text-white', 'border-transparent');
-        document.getElementById('tab-portfolio').classList.remove('text-brand-blue', 'border-brand-blue');
-        document.getElementById('tab-portfolio').classList.add('text-dark-muted', 'hover:text-white', 'border-transparent');
-    }
+    const tabs = ['portfolio', 'proventos', 'transactions'];
+    tabs.forEach(t => {
+        const view = document.getElementById(`${t}-view`);
+        const btn = document.getElementById(`tab-${t}`);
+        if (!view || !btn) return;
+        
+        if (t === tabId) {
+            view.classList.remove('hidden');
+            btn.classList.add('text-brand-blue', 'border-brand-blue');
+            btn.classList.remove('text-dark-muted', 'hover:text-white', 'border-transparent');
+        } else {
+            view.classList.add('hidden');
+            btn.classList.remove('text-brand-blue', 'border-brand-blue');
+            btn.classList.add('text-dark-muted', 'hover:text-white', 'border-transparent');
+        }
+    });
 }
 
 function focusInvestmentForm() {
@@ -408,11 +409,34 @@ async function fetchWallet() {
         renderWallet(globalAssets, currentExchangeRate);
         renderTransactions(globalTransactions);
         renderInvestmentSummary(globalInvestmentSummary);
+        if (!proventosLoaded) {
+            fetchProventos();
+        } else {
+            renderProventos(globalProventosSummary);
+        }
     } catch (error) {
         console.error("Error fetching wallet", error);
         showFeedback('Error fetching wallet');
     } finally {
         hideLoader();
+    }
+}
+
+let globalProventosSummary = null;
+let proventosLoaded = false;
+
+async function fetchProventos() {
+    try {
+        document.getElementById('prov-total-all').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-sm"></i>';
+        const response = await fetch('/api/wallet/proventos');
+        const data = await response.json();
+        if (response.ok) {
+            globalProventosSummary = data;
+            proventosLoaded = true;
+            renderProventos(globalProventosSummary);
+        }
+    } catch (e) {
+        console.error('Failed to load proventos', e);
     }
 }
 
@@ -597,6 +621,166 @@ function renderInvestmentSummary(summary) {
             <td class="py-3 px-6 text-right">${formatCurrency(month.net_brl_equivalent || 0, 'BRL')}</td>
         </tr>
     `).join('');
+}
+
+let proventosChartInstance = null;
+
+function renderProventos(summary) {
+    if (!summary) return;
+    
+    // Summary Cards
+    let totalAllTime = 0;
+    if (summary.by_asset) {
+        summary.by_asset.forEach(a => {
+            const divUsd = (a.dividend_amount && a.currency === 'USD') ? a.dividend_amount : 0;
+            const divBrl = (a.dividend_amount && a.currency === 'BRL') ? a.dividend_amount : 0;
+            totalAllTime += divBrl + (divUsd * currentExchangeRate);
+        });
+    }
+    
+    setText('prov-total-all', formatCurrency(totalAllTime, 'BRL'));
+    
+    const monthly = summary.monthly || [];
+    const last12 = monthly.slice(-12);
+    let total12m = 0;
+    last12.forEach(m => {
+        total12m += (m.dividend_brl || 0) + ((m.dividend_usd || 0) * currentExchangeRate);
+    });
+    
+    const avg12m = last12.length > 0 ? total12m / last12.length : 0;
+    setText('prov-monthly-avg', formatCurrency(avg12m, 'BRL'));
+    
+    const lastMonth = last12.length > 0 ? last12[last12.length - 1] : null;
+    const lastMonthTotal = lastMonth ? (lastMonth.dividend_brl || 0) + ((lastMonth.dividend_usd || 0) * currentExchangeRate) : 0;
+    setText('prov-last-month', formatCurrency(lastMonthTotal, 'BRL'));
+    
+    // Chart
+    const labels = last12.map(item => formatMonth(item.month));
+    const data = last12.map(item => (item.dividend_brl || 0) + ((item.dividend_usd || 0) * currentExchangeRate));
+    
+    if (typeof Chart !== 'undefined') {
+        const ctx = document.getElementById('proventosChart');
+        if (ctx) {
+            if (proventosChartInstance) {
+                proventosChartInstance.destroy();
+            }
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); // blue-500
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+
+            proventosChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Proventos Recebidos (BRL)',
+                        data: data,
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        hoverBackgroundColor: 'rgba(59, 130, 246, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#f8fafc', font: { family: 'Inter', size: 13, weight: '500' } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 14, family: 'Inter' },
+                            bodyFont: { size: 14, family: 'Inter' },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'R$ ' + context.parsed.y.toFixed(2).replace('.', ',');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8', font: { family: 'Inter' }, callback: value => formatCurrency(value, 'BRL') },
+                            grid: { color: 'rgba(51, 65, 85, 0.5)', borderDash: [5, 5] },
+                            border: { display: false }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8', font: { family: 'Inter' } },
+                            grid: { display: false },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    // Table
+    const tbody = document.getElementById('proventos-assets-body');
+    if (!tbody) return;
+    
+    if (!summary.by_asset || summary.by_asset.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="py-4 px-6 text-center text-dark-muted">No dividend data available.</td></tr>';
+        return;
+    }
+    
+    const dividendAssets = summary.by_asset.filter(a => a.dividend_amount && a.dividend_amount > 0);
+    dividendAssets.sort((a, b) => {
+        const valA = a.currency === 'USD' ? a.dividend_amount * currentExchangeRate : a.dividend_amount;
+        const valB = b.currency === 'USD' ? b.dividend_amount * currentExchangeRate : b.dividend_amount;
+        return valB - valA;
+    });
+    
+    if (dividendAssets.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="py-4 px-6 text-center text-dark-muted">No dividend data available.</td></tr>';
+    } else {
+        tbody.innerHTML = dividendAssets.map(a => `
+            <tr class="hover:bg-dark-border/10 transition-colors">
+                <td class="py-3 px-6 font-medium">${a.ticker}</td>
+                <td class="py-3 px-6 text-dark-muted">${a.tag || '-'}</td>
+                <td class="py-3 px-6 text-right font-medium text-brand-green">${formatCurrency(a.dividend_amount, a.currency)}</td>
+            </tr>
+        `).join('');
+    }
+
+    // History Table
+    const histBody = document.getElementById('proventos-history-body');
+    if (!histBody) return;
+    
+    if (!summary.events || summary.events.length === 0) {
+        histBody.innerHTML = '<tr><td colspan="7" class="py-4 px-6 text-center text-dark-muted">No historical dividend events found.</td></tr>';
+        return;
+    }
+    
+    histBody.innerHTML = summary.events.map(ev => {
+        // Date formatting: Ex-Date (Data Com)
+        const dateParts = ev.date.split('-');
+        const dateStr = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+        
+        const isPaid = ev.status === 'Pago';
+        const statusBadge = isPaid 
+            ? '<span class="bg-brand-green/20 text-brand-green px-2 py-1 rounded text-xs font-semibold flex items-center w-max"><i class="fa-solid fa-check-circle mr-1"></i> Pago</span>'
+            : '<span class="bg-brand-blue/20 text-brand-blue px-2 py-1 rounded text-xs font-semibold flex items-center w-max"><i class="fa-solid fa-calendar-day mr-1"></i> A Receber</span>';
+            
+        return `
+            <tr class="hover:bg-dark-border/10 transition-colors">
+                <td class="py-3 px-6 font-medium flex items-center">
+                    <span class="w-6 h-6 rounded-full bg-dark-bg border border-dark-border flex items-center justify-center mr-2 text-[10px]"><i class="fa-solid fa-building"></i></span>
+                    ${ev.ticker}
+                </td>
+                <td class="py-3 px-6 text-dark-muted"><span class="bg-dark-bg border border-dark-border px-2 py-1 rounded text-xs">${ev.tag || '-'}</span></td>
+                <td class="py-3 px-6">${statusBadge}</td>
+                <td class="py-3 px-6">${dateStr}</td>
+                <td class="py-3 px-6 text-right">${formatQuantity(ev.quantity)}</td>
+                <td class="py-3 px-6 text-right text-dark-muted">${formatCurrency(ev.amount_per_share, ev.currency)}</td>
+                <td class="py-3 px-6 text-right font-medium">${formatCurrency(ev.amount, ev.currency)}</td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function setText(id, value) {

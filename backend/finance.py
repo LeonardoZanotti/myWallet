@@ -62,3 +62,37 @@ def get_historical_exchange_rate(date_str):
     except Exception as e:
         print(f"Error fetching historical exchange rate for {date_str}: {e}")
     return get_exchange_rate()
+
+def get_historical_dividends(assets):
+    """
+    Fetches historical dividends for a list of assets.
+    Returns a dictionary: { 'TICKER': { 'date_str': amount_per_share, ... }, ... }
+    """
+    if not assets:
+        return {}
+        
+    dividends = {}
+    try:
+        for asset in assets:
+            ticker = asset['ticker']
+            tag = asset.get('tag', '')
+            query_ticker = _format_ticker_for_yahoo(ticker, tag)
+            
+            ticker_obj = yf.Ticker(query_ticker)
+            try:
+                divs = ticker_obj.dividends
+                if divs is not None and not divs.empty:
+                    # divs index is datetime, values are float
+                    div_dict = {}
+                    for date, amount in divs.items():
+                        # Pandas Timestamp to string
+                        date_str = date.strftime('%Y-%m-%d')
+                        div_dict[date_str] = float(amount)
+                    dividends[ticker] = div_dict
+                else:
+                    dividends[ticker] = {}
+            except Exception:
+                dividends[ticker] = {}
+    except Exception as e:
+        print(f"Error fetching dividends: {e}")
+    return dividends

@@ -140,6 +140,7 @@
 
         <div class="flex space-x-4 border-b border-dark-border mb-6">
             <button onclick="switchTab('portfolio')" id="tab-portfolio" class="pb-2 px-4 text-brand-blue border-b-2 border-brand-blue font-medium transition-colors">Portfolio Overview</button>
+            <button onclick="switchTab('proventos')" id="tab-proventos" class="pb-2 px-4 text-dark-muted hover:text-white border-b-2 border-transparent font-medium transition-colors">Proventos (Dividends)</button>
             <button onclick="switchTab('transactions')" id="tab-transactions" class="pb-2 px-4 text-dark-muted hover:text-white border-b-2 border-transparent font-medium transition-colors">Investment History</button>
         </div>
 
@@ -198,6 +199,78 @@
         </div>
         </div>
         <!-- END PORTFOLIO VIEW -->
+
+        <!-- PROVENTOS VIEW -->
+        <div id="proventos-view" class="hidden space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div class="summary-card bg-dark-card p-5 rounded-2xl border border-dark-border shadow-lg">
+                    <p class="text-dark-muted text-sm font-medium mb-1">Total Dividends (All Time)</p>
+                    <h3 class="text-xl font-bold text-brand-green" id="prov-total-all">R$ 0,00</h3>
+                </div>
+                <div class="summary-card bg-dark-card p-5 rounded-2xl border border-dark-border shadow-lg">
+                    <p class="text-dark-muted text-sm font-medium mb-1">Monthly Average (12M)</p>
+                    <h3 class="text-xl font-bold" id="prov-monthly-avg">R$ 0,00</h3>
+                </div>
+                <div class="summary-card bg-dark-card p-5 rounded-2xl border border-dark-border shadow-lg">
+                    <p class="text-dark-muted text-sm font-medium mb-1">Last Month</p>
+                    <h3 class="text-xl font-bold" id="prov-last-month">R$ 0,00</h3>
+                </div>
+            </div>
+
+            <!-- Proventos Evolution Chart -->
+            <div class="bg-dark-card p-6 rounded-2xl border border-dark-border shadow-lg">
+                <h3 class="font-bold mb-4">Evolução de Proventos</h3>
+                <div class="relative h-72">
+                    <canvas id="proventosChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Proventos by Asset -->
+            <div class="bg-dark-card rounded-2xl border border-dark-border shadow-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-dark-border bg-dark-bg/30">
+                    <h3 class="font-bold flex items-center">
+                        <i class="fa-solid fa-coins text-brand-green mr-2"></i> Dividends by Asset
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-dark-muted text-xs uppercase tracking-wider border-b border-dark-border bg-dark-bg/10">
+                                <th class="py-3 px-6">Asset</th>
+                                <th class="py-3 px-6">Category</th>
+                                <th class="py-3 px-6 text-right">Total Dividends</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proventos-assets-body" class="text-sm divide-y divide-dark-border"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Meus Proventos (History) -->
+            <div class="bg-dark-card rounded-2xl border border-dark-border shadow-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-dark-border bg-dark-bg/30 flex justify-between items-center">
+                    <h3 class="font-bold flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left text-brand-blue mr-2"></i> Histórico de Proventos
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-dark-muted text-xs uppercase tracking-wider border-b border-dark-border bg-dark-bg/10">
+                                <th class="py-3 px-6">Ativo</th>
+                                <th class="py-3 px-6">Categoria</th>
+                                <th class="py-3 px-6">Status do pagamento</th>
+                                <th class="py-3 px-6">Data Com</th>
+                                <th class="py-3 px-6 text-right">Quantidade</th>
+                                <th class="py-3 px-6 text-right">Valor do div.</th>
+                                <th class="py-3 px-6 text-right">Valor total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proventos-history-body" class="text-sm divide-y divide-dark-border"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <!-- TRANSACTIONS VIEW -->
         <div id="transactions-view" class="hidden space-y-8">

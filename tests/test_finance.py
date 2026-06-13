@@ -116,3 +116,45 @@ def test_get_historical_exchange_rate_exception(mock_get_exch, mock_ticker):
     
     rate = get_historical_exchange_rate('2026-05-10')
     assert rate == 5.0
+
+from backend.finance import get_historical_dividends
+from unittest.mock import PropertyMock
+
+@patch('backend.finance.yf.Ticker')
+def test_get_historical_dividends_success(mock_ticker):
+    mock_instance = MagicMock()
+    div_series = pd.Series(
+        data=[1.5, 2.0], 
+        index=[pd.Timestamp('2026-05-10'), pd.Timestamp('2026-06-10')]
+    )
+    mock_instance.dividends = div_series
+    mock_ticker.return_value = mock_instance
+    
+    dividends = get_historical_dividends([{'ticker': 'A'}])
+    assert dividends['A']['2026-05-10'] == 1.5
+    assert dividends['A']['2026-06-10'] == 2.0
+
+@patch('backend.finance.yf.Ticker')
+def test_get_historical_dividends_empty(mock_ticker):
+    mock_instance = MagicMock()
+    mock_instance.dividends = pd.Series(dtype=float)
+    mock_ticker.return_value = mock_instance
+    dividends = get_historical_dividends([{'ticker': 'A'}])
+    assert dividends['A'] == {}
+
+@patch('backend.finance.yf.Ticker')
+def test_get_historical_dividends_exception(mock_ticker):
+    mock_instance = MagicMock()
+    type(mock_instance).dividends = PropertyMock(side_effect=Exception("API error"))
+    mock_ticker.return_value = mock_instance
+    dividends = get_historical_dividends([{'ticker': 'A'}])
+    assert dividends['A'] == {}
+
+@patch('backend.finance.yf.Ticker')
+def test_get_historical_dividends_general_exception(mock_ticker):
+    mock_ticker.side_effect = Exception("General error")
+    dividends = get_historical_dividends([{'ticker': 'A'}])
+    assert dividends == {}
+
+def test_get_historical_dividends_empty_list():
+    assert get_historical_dividends([]) == {}

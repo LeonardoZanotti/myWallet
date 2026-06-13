@@ -7,7 +7,8 @@
 - `backend/app.py`: Flask routes and API response assembly.
 - `backend/wallet.py`: JSON persistence, transaction normalization, quantity/average-price recalculation, investment summaries.
 - `backend/calculator.py`: smart-buy allocation algorithm.
-- `backend/finance.py`: Yahoo Finance prices and USD/BRL exchange rate.
+- `backend/finance.py`: Yahoo Finance prices, historical dividends, and USD/BRL exchange rate.
+- `backend/proventos.py`: historical dividend earnings calculation based on user transaction ledger.
 - `backend/validation.py`: request validation and type coercion.
 - `frontend/index.html`: dashboard structure, tabs, tables, forms, modals.
 - `frontend/app.js`: data fetching, rendering, forms, charts, smart-buy modal.
@@ -73,6 +74,16 @@ Returns:
 - `exchange_rate`
 
 Only current holdings are returned in `assets`; sold-out assets remain visible through `transactions`.
+
+### `GET /api/wallet/proventos`
+
+Returns:
+
+- `events`: List of all historical dividend events (ticker, tag, currency, date, amount, amount_per_share, quantity, status).
+- `monthly`: Aggregated dividend totals by month.
+- `by_asset`: Aggregated dividend totals per asset.
+- `total_brl`: Total dividends received in BRL.
+- `total_usd`: Total dividends received in USD.
 
 ### `POST /api/wallet/asset`
 
@@ -182,6 +193,14 @@ The monthly chart uses the same monthly data as the table:
 - blue bars: USD buys converted to BRL
 - amber line: accumulated net invested in BRL equivalent
 
+## Proventos (Dividends) History
+
+The Proventos tab uses data from `/api/wallet/proventos`.
+
+- **Calculation**: For each asset, fetches historical dividend ex-dates from Yahoo Finance. Iterates over the user's ledger to determine the exact quantity held *before* the ex-date.
+- **Status**: Events with an ex-date at least 15 days in the past are marked as `Pago`. Newer events are `A Receber`.
+- **Totals**: Only `Pago` events contribute to the global and monthly totals to align with realized earnings.
+
 Selenium tests assert the rendered history and chart data for ledger fixtures.
 
 ## Smart-Buy Algorithm
@@ -238,6 +257,7 @@ Returned globally:
 ## Frontend Behavior
 
 - The portfolio tab shows current holdings only.
+- The proventos tab shows historical and pending dividend earnings automatically extracted from the internet and matched against your transaction dates.
 - The investment history tab shows historical ledger entries, including sold-out tickers.
 - New Investment Release creates one BUY transaction per line.
 - Add Adjustment opens the low-level ledger modal for BUY/SELL fixes.

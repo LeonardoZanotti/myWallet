@@ -878,7 +878,10 @@ async function calculateSmartBuy() {
             let buyText = isSkip ? '-' : `+${formatCurrency(r.value_to_buy, r.currency)}`;
             
             tbody.innerHTML += `
-            <tr class="${rowClass} border-b border-dark-border/50 last:border-0">
+            <tr class="${rowClass} border-b border-dark-border/50 last:border-0" data-skip="${isSkip}">
+                <td class="py-3 px-2 text-center">
+                    <input type="checkbox" onchange="toggleRowStatus(this)" class="w-4 h-4 rounded border-dark-border bg-dark-bg text-brand-blue focus:ring-brand-blue accent-brand-blue cursor-pointer">
+                </td>
                 <td class="py-3 px-2 font-medium">${r.ticker}</td>
                 <td class="py-3 px-2 text-dark-muted text-[11px] uppercase tracking-wider">${r.tag}</td>
                 <td class="py-3 px-2 text-right">
@@ -993,4 +996,15 @@ function renderChart(groups, exchangeRate = 5.0) {
             cutout: '75%'
         }
     });
+}
+
+function toggleRowStatus(checkbox) {
+    const row = checkbox.closest('tr');
+    if (checkbox.checked) {
+        row.classList.add('opacity-40', 'grayscale');
+    } else {
+        if (row.dataset.skip !== 'true') {
+            row.classList.remove('opacity-40', 'grayscale');
+        }
+    }
 }

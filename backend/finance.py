@@ -1,4 +1,5 @@
 import yfinance as yf
+import math
 
 from backend.config import BRL_CATEGORIES
 
@@ -27,7 +28,8 @@ def get_current_prices(assets):
             try:
                 hist = ticker_obj.history(period="5d")
                 if not hist.empty:
-                    prices[ticker] = float(hist['Close'].iloc[-1])
+                    val = float(hist['Close'].iloc[-1])
+                    prices[ticker] = val if not math.isnan(val) else None
                 else:
                     prices[ticker] = None
             except Exception:
@@ -42,7 +44,9 @@ def get_exchange_rate():
         ticker = yf.Ticker("USDBRL=X")
         hist = ticker.history(period="5d")
         if not hist.empty:
-            return float(hist['Close'].iloc[-1])
+            val = float(hist['Close'].iloc[-1])
+            if not math.isnan(val):
+                return val
     except Exception as e:
         print(f"Error fetching exchange rate: {e}")
     return 5.0  # Fallback exchange rate
@@ -58,7 +62,9 @@ def get_historical_exchange_rate(date_str):
         end_str = end_obj.strftime('%Y-%m-%d')
         hist = ticker.history(start=date_str, end=end_str)
         if not hist.empty:
-            return float(hist['Close'].iloc[0])
+            val = float(hist['Close'].iloc[0])
+            if not math.isnan(val):
+                return val
     except Exception as e:
         print(f"Error fetching historical exchange rate for {date_str}: {e}")
     return get_exchange_rate()

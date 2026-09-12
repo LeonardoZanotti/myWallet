@@ -90,7 +90,9 @@ Deletes the asset and all of its transactions.
 
 Adds a BUY/SELL entry and recalculates the affected asset. Payloads may include either `quantity + price` or `amount + price`.
 
-Optional `currency`, `tag`, and `weight` let a new investment line create/update asset metadata at the same time.
+The standard UI paths send only `ticker`, `date`, `type`, `quantity`, and `price`. The backend calculates `amount = quantity * price`, infers currency from an existing wallet asset, and keeps that asset's `tag` and `weight` unchanged.
+
+Optional `currency`, `tag`, and `weight` are still accepted by the API for advanced or imported entries. They can create/update asset metadata when the ticker is not already in the wallet.
 
 ### `DELETE /api/wallet/transaction/<id>`
 
@@ -114,6 +116,8 @@ For each asset:
 - `total_value = quantity * current_price`.
 - `variation = ((current_price - average_price) / average_price) * 100`.
 - if `average_price` is zero or price is missing, variation is `0`.
+
+For stored transactions, `amount` is derived with Decimal-backed multiplication from `quantity * price` when the payload does not provide an explicit amount. This avoids binary floating point artifacts in values such as `0.1 * 0.2`.
 
 ### Unified BRL Values
 
@@ -178,11 +182,13 @@ Monthly rows include:
 
 The monthly chart uses the same monthly data as the table:
 
-- green bars: BRL buys
-- blue bars: USD buys converted to BRL
+- green side-by-side bars: BRL buys
+- blue side-by-side bars: USD buys converted to BRL
 - amber line: accumulated net invested in BRL equivalent
 
 Selenium tests assert the rendered history and chart data for ledger fixtures.
+
+New Investment Release and Add Adjustment forms intentionally ask only for ticker, unit price, and quantity, plus the shared date and adjustment type where needed. Currency, category, and weight are inferred from the ticker already stored in the wallet.
 
 ## Smart-Buy Algorithm
 

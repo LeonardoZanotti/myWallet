@@ -2,6 +2,7 @@ import json
 import os
 import uuid
 import datetime
+from decimal import Decimal
 
 from backend.config import BRL_CATEGORIES
 
@@ -19,11 +20,16 @@ def _detect_currency(asset):
 def _default_tag_for_currency(currency):
     return 'Stocks' if currency == 'USD' else 'Ações'
 
+def _decimal(value):
+    return Decimal(str(value))
+
 def _transaction_amount(tx):
     amount = tx.get('amount')
     if amount not in ('', None):
         return float(amount)
-    return float(tx.get('quantity', 0) or 0) * float(tx.get('price', 0) or 0)
+    quantity = tx.get('quantity', 0) or 0
+    price = tx.get('price', 0) or 0
+    return float(_decimal(quantity) * _decimal(price))
 
 def _normalize_transaction(tx, assets_by_ticker):
     tx['ticker'] = str(tx.get('ticker', '')).strip().upper()

@@ -416,7 +416,7 @@
             </div>
             <div class="p-6">
                 <form id="tx-form" class="space-y-4">
-                    <div class="flex space-x-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="flex-1">
                             <label class="text-dark-muted text-xs font-medium mb-1 block">Ticker</label>
                             <input type="text" id="tx-ticker" required placeholder="e.g. VOO" class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
@@ -426,52 +426,21 @@
                             <input type="date" id="tx-date" required class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
                         </div>
                     </div>
-                    <div class="flex space-x-4">
-                        <div class="w-1/3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
                             <label class="text-dark-muted text-xs font-medium mb-1 block">Type</label>
                             <select id="tx-type" required class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
                                 <option value="BUY">BUY</option>
                                 <option value="SELL">SELL</option>
                             </select>
                         </div>
-                        <div class="w-1/3">
-                            <label class="text-dark-muted text-xs font-medium mb-1 block">Currency</label>
-                            <select id="tx-currency" required class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-                                <option value="BRL">BRL</option>
-                                <option value="USD">USD</option>
-                            </select>
-                        </div>
-                        <div class="w-1/3">
-                            <label class="text-dark-muted text-xs font-medium mb-1 block">Amount</label>
-                            <input type="text" inputmode="decimal" id="tx-amount" placeholder="optional" class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-                        </div>
-                    </div>
-                    <div class="flex space-x-4">
-                        <div class="flex-1">
+                        <div>
                             <label class="text-dark-muted text-xs font-medium mb-1 block">Quantity</label>
-                            <input type="text" inputmode="decimal" id="tx-qty" placeholder="auto from amount" class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+                            <input type="text" inputmode="decimal" id="tx-qty" required placeholder="10" class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
                         </div>
-                        <div class="flex-1">
-                            <label class="text-dark-muted text-xs font-medium mb-1 block">Price</label>
+                        <div>
+                            <label class="text-dark-muted text-xs font-medium mb-1 block">Unit Price</label>
                             <input type="text" inputmode="decimal" id="tx-price" required class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-                        </div>
-                    </div>
-                    <div class="flex space-x-4">
-                        <div class="flex-1">
-                            <label class="text-dark-muted text-xs font-medium mb-1 block">Category</label>
-                            <select id="tx-tag" required class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-                                <option value="BR ETFs">BR ETFs</option>
-                                <option value="US ETFs">US ETFs</option>
-                                <option value="FII">FII</option>
-                                <option value="Ações">Ações</option>
-                                <option value="BDR">BDR</option>
-                                <option value="Stocks">Stocks</option>
-                                <option value="Crypto">Crypto</option>
-                            </select>
-                        </div>
-                        <div class="w-32">
-                            <label class="text-dark-muted text-xs font-medium mb-1 block">Weight</label>
-                            <input type="number" id="tx-weight" min="0" max="100" value="10" class="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
                         </div>
                     </div>
                     <button type="submit" class="w-full bg-brand-green hover:bg-brand-greenHover text-white font-medium py-2 rounded-lg transition-colors flex items-center justify-center">

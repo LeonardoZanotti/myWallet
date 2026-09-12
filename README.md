@@ -62,7 +62,7 @@ Then open `http://localhost:5000`.
 
 - Track BRL and USD assets in one wallet
 - Store assets and group targets locally
-- Record monthly contribution releases with multiple BRL/USD investment lines
+- Record monthly contribution releases with ticker, unit price, and quantity while reusing wallet metadata
 - Build portfolio balances from the investment ledger and show contribution history
 - Fetch current prices and USD/BRL exchange rate from Yahoo Finance
 - View grouped wallet totals, returns, and allocation percentages
@@ -88,6 +88,8 @@ Then open `http://localhost:5000`.
 - BRL cash is invested only into BRL assets; USD cash is invested only into USD assets.
 - USD recommendations can be fractional shares.
 - BRL recommendations are rounded down to whole shares, then a greedy leftover pass tries to spend the remaining BRL on the most under-allocated eligible asset.
+- Transaction amounts are calculated from `quantity * unit price` with Decimal-backed arithmetic before storage.
+- Existing ticker metadata is reused for new releases and adjustments, so category, currency, and weight stay consistent with the wallet.
 
 That last point means the final smart-buy result can be close to, but not always exactly equal to, the ideal allocation.
 

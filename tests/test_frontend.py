@@ -178,3 +178,95 @@ def test_investment_history_tab_shows_ledger(browser, frontend_env):
         assert chart_data["brlBuys"] == [0]
         assert chart_data["usdBuysInBrl"] == [750]
         assert chart_data["accumulatedData"] == [750]
+
+
+def test_investment_release_uses_minimal_existing_asset_fields(browser, frontend_env):
+    frontend_env.write_text(json.dumps({
+        "assets": [
+            {"ticker": "VOO", "weight": 100, "tag": "US ETFs"}
+        ],
+        "groups": {"US ETFs": {"target_percent": 100}},
+        "transactions": [
+            {"id": "1", "ticker": "VOO", "tag": "US ETFs", "type": "BUY", "quantity": 1, "price": 100, "amount": 100, "currency": "USD", "date": "2026-04-20"}
+        ]
+    }, ensure_ascii=False), encoding="utf-8")
+
+    with live_server(backend_app.app) as url:
+        browser.get(url)
+        wait_for_text(browser, By.ID, "asset-groups-container", "VOO")
+
+        browser.find_element(By.ID, "tab-transactions").click()
+        WebDriverWait(browser, 10).until(
+            EC.visibility_of_element_located((By.ID, "transactions-view"))
+        )
+
+        release_line = browser.find_element(By.CSS_SELECTOR, ".release-line")
+        assert not release_line.find_elements(By.CSS_SELECTOR, '[data-field="amount"]')
+        assert not release_line.find_elements(By.CSS_SELECTOR, '[data-field="currency"]')
+        assert not release_line.find_elements(By.CSS_SELECTOR, '[data-field="tag"]')
+        assert not release_line.find_elements(By.CSS_SELECTOR, '[data-field="weight"]')
+
+        browser.execute_script("""
+            document.getElementById('release-date').value = '2026-05-10';
+            document.querySelector('.release-line [data-field="ticker"]').value = 'VOO';
+            document.querySelector('.release-line [data-field="price"]').value = '110';
+            document.querySelector('.release-line [data-field="quantity"]').value = '2';
+            document.getElementById('release-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        """)
+
+        wait_for_text(browser, By.ID, "app-feedback", "Monthly contribution saved.")
+        wait_for_text(browser, By.ID, "transactions-body", "2026-05-10")
+
+        txs = json.loads(frontend_env.read_text(encoding="utf-8"))["transactions"]
+        saved = next(tx for tx in txs if tx["date"] == "2026-05-10")
+        assert saved["ticker"] == "VOO"
+        assert saved["quantity"] == 2
+        assert saved["price"] == 110
+        assert saved["amount"] == 220
+        assert saved["currency"] == "USD"
+        assert "tag" not in saved
+        assert "weight" not in saved
+
+
+def test_adjustment_modal_uses_minimal_existing_asset_fields(browser, frontend_env):
+    with live_server(backend_app.app) as url:
+        browser.get(url)
+
+        browser.execute_script("openTxModal();")
+        WebDriverWait(browser, 10).until(
+            EC.visibility_of_element_located((By.ID, "tx-modal"))
+        )
+
+        assert not browser.find_elements(By.ID, "tx-amount")
+        assert not browser.find_elements(By.ID, "tx-currency")
+        assert not browser.find_elements(By.ID, "tx-tag")
+        assert not browser.find_elements(By.ID, "tx-weight")
+
+
+def test_monthly_contribution_chart_displays_brl_and_usd_side_by_side(browser, frontend_env):
+    frontend_env.write_text(json.dumps({
+        "assets": [
+            {"ticker": "PETR4.SA", "weight": 100, "tag": "Ações"},
+            {"ticker": "VOO", "weight": 100, "tag": "US ETFs"}
+        ],
+        "groups": {},
+        "transactions": [
+            {"id": "1", "ticker": "PETR4.SA", "tag": "Ações", "type": "BUY", "quantity": 10, "price": 10, "amount": 100, "currency": "BRL", "date": "2026-04-20"},
+            {"id": "2", "ticker": "VOO", "tag": "US ETFs", "type": "BUY", "quantity": 1, "price": 20, "amount": 20, "currency": "USD", "date": "2026-04-20"}
+        ]
+    }, ensure_ascii=False), encoding="utf-8")
+
+    with live_server(backend_app.app) as url:
+        browser.get(url)
+        wait_for_text(browser, By.ID, "asset-groups-container", "PETR4.SA")
+
+        browser.find_element(By.ID, "tab-transactions").click()
+        WebDriverWait(browser, 10).until(
+            EC.visibility_of_element_located((By.ID, "transactions-view"))
+        )
+
+        chart_config = browser.execute_script("return window.__lastEvolutionChartConfig")
+        assert chart_config["xStacked"] is False
+        assert chart_config["yStacked"] is False
+        assert chart_config["datasets"][0]["stack"] is None
+        assert chart_config["datasets"][1]["stack"] is None

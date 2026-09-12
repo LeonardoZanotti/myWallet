@@ -1,3 +1,7 @@
+import datetime
+from decimal import Decimal
+
+
 class ValidationError(ValueError):
     pass
 
@@ -20,6 +24,14 @@ def _to_int(value, field_name):
         return int(value)
     except (TypeError, ValueError):
         raise ValidationError(f'{field_name} must be an integer.')
+
+
+def _decimal(value):
+    return Decimal(str(value))
+
+
+def _multiply_money(quantity, price):
+    return float(_decimal(quantity) * _decimal(price))
 
 
 def validate_asset_payload(data, partial=False):
@@ -88,8 +100,6 @@ def validate_investment_payload(data):
     return {'invest_brl': invest_brl, 'invest_usd': invest_usd}
 
 
-import datetime
-
 def validate_transaction_payload(data):
     data = _require_mapping(data)
     cleaned = {}
@@ -139,10 +149,10 @@ def validate_transaction_payload(data):
     if quantity is None:
         if price <= 0:
             raise ValidationError('Price must be greater than zero when amount is used.')
-        quantity = amount / price
+        quantity = float(_decimal(amount) / _decimal(price))
 
     cleaned['quantity'] = quantity
-    cleaned['amount'] = amount if amount is not None else quantity * price
+    cleaned['amount'] = amount if amount is not None else _multiply_money(quantity, price)
 
     if 'currency' in data and data.get('currency') not in ('', None):
         currency = str(data.get('currency', '')).strip().upper()

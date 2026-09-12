@@ -84,6 +84,16 @@ def test_validate_transaction_payload_success():
         'amount': 150.75
     }
 
+def test_validate_transaction_payload_calculates_amount_with_decimal_precision():
+    payload = validate_transaction_payload({
+        'ticker': ' voo ',
+        'date': '2026-05-10',
+        'type': 'buy',
+        'quantity': '0.1',
+        'price': '0.2'
+    })
+    assert payload['amount'] == 0.02
+
 def test_validate_transaction_payload_derives_quantity_from_amount():
     payload = validate_transaction_payload({
         'ticker': ' voo ',

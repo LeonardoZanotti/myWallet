@@ -144,34 +144,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tx-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         clearFeedback();
-        const data = {
-            ticker: document.getElementById('tx-ticker').value.toUpperCase(),
+        const data = buildTransactionPayload({
+            ticker: document.getElementById('tx-ticker').value,
             date: document.getElementById('tx-date').value,
             type: document.getElementById('tx-type').value,
-            quantity: parseLocalizedNumber(document.getElementById('tx-qty').value),
-            price: parseLocalizedNumber(document.getElementById('tx-price').value),
-            amount: parseLocalizedNumber(document.getElementById('tx-amount').value),
-            currency: document.getElementById('tx-currency').value,
-            tag: document.getElementById('tx-tag').value,
-            weight: parseInt(document.getElementById('tx-weight').value || '0')
-        };
+            quantity: document.getElementById('tx-qty').value,
+            price: document.getElementById('tx-price').value
+        });
         
         showLoader();
         try {
-            const response = await fetch('/api/wallet/transaction', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const payload = await response.json();
-            if (!response.ok) {
-                showFeedback(payload.error || 'Could not save transaction.');
+            const saved = await postTransaction(data);
+            if (!saved.ok) {
+                showFeedback(saved.error || 'Could not save transaction.');
                 return;
             }
             e.target.reset();
             closeTxModal();
-            showFeedback('Transaction saved.', 'success');
             await fetchWallet();
+            showFeedback('Transaction saved.', 'success');
         } finally {
             hideLoader();
         }
@@ -235,36 +226,14 @@ function closeTxModal() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 }
 
-function categoryOptions(selected = 'BR ETFs') {
-    const categories = ['BR ETFs', 'US ETFs', 'FII', 'Ações', 'BDR', 'Stocks', 'Crypto'];
-    return categories.map(category => `<option value="${category}" ${category === selected ? 'selected' : ''}>${category}</option>`).join('');
-}
-
 function addReleaseLine(defaults = {}) {
     const container = document.getElementById('release-lines');
     const line = document.createElement('div');
-    line.className = 'release-line grid grid-cols-1 xl:grid-cols-[1.1fr_1fr_.8fr_1fr_1fr_1fr_.7fr_auto] gap-3 items-end p-4 border border-dark-border rounded-xl bg-dark-bg/35';
+    line.className = 'release-line grid grid-cols-1 md:grid-cols-[1.2fr_1fr_1fr_auto] gap-3 items-end p-4 border border-dark-border rounded-xl bg-dark-bg/35';
     line.innerHTML = `
         <div>
             <label class="text-dark-muted text-xs font-medium mb-1 block">Ticker</label>
             <input type="text" data-field="ticker" value="${defaults.ticker || ''}" required placeholder="IVVB11, VOO" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-        </div>
-        <div>
-            <label class="text-dark-muted text-xs font-medium mb-1 block">Category</label>
-            <select data-field="tag" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-                ${categoryOptions(defaults.tag || 'BR ETFs')}
-            </select>
-        </div>
-        <div>
-            <label class="text-dark-muted text-xs font-medium mb-1 block">Currency</label>
-            <select data-field="currency" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-                <option value="BRL" ${(defaults.currency || 'BRL') === 'BRL' ? 'selected' : ''}>BRL</option>
-                <option value="USD" ${defaults.currency === 'USD' ? 'selected' : ''}>USD</option>
-            </select>
-        </div>
-        <div>
-            <label class="text-dark-muted text-xs font-medium mb-1 block">Invested</label>
-            <input type="text" inputmode="decimal" data-field="amount" value="${defaults.amount || ''}" required placeholder="1000,00" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
         </div>
         <div>
             <label class="text-dark-muted text-xs font-medium mb-1 block">Unit Price</label>
@@ -272,11 +241,7 @@ function addReleaseLine(defaults = {}) {
         </div>
         <div>
             <label class="text-dark-muted text-xs font-medium mb-1 block">Quantity</label>
-            <input type="text" inputmode="decimal" data-field="quantity" value="${defaults.quantity || ''}" placeholder="auto" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
-        </div>
-        <div>
-            <label class="text-dark-muted text-xs font-medium mb-1 block">Weight</label>
-            <input type="number" min="0" max="100" data-field="weight" value="${defaults.weight || 10}" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
+            <input type="text" inputmode="decimal" data-field="quantity" value="${defaults.quantity || ''}" required placeholder="10" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 text-dark-text focus:border-brand-blue outline-none transition-colors">
         </div>
         <button type="button" onclick="removeReleaseLine(this)" class="h-10 w-10 inline-flex items-center justify-center rounded-lg text-dark-muted hover:text-brand-red hover:bg-brand-red/10 transition-colors" title="Remove line">
             <i class="fa-solid fa-trash"></i>
@@ -288,9 +253,7 @@ function addReleaseLine(defaults = {}) {
 function removeReleaseLine(button) {
     const container = document.getElementById('release-lines');
     if (container.children.length === 1) {
-        button.closest('.release-line').querySelectorAll('input').forEach(input => {
-            if (input.dataset.field !== 'weight') input.value = '';
-        });
+        button.closest('.release-line').querySelectorAll('input').forEach(input => input.value = '');
         return;
     }
     button.closest('.release-line').remove();
@@ -298,20 +261,13 @@ function removeReleaseLine(button) {
 
 function readReleaseLine(line, date) {
     const field = name => line.querySelector(`[data-field="${name}"]`);
-    const amount = parseLocalizedNumber(field('amount').value);
-    const price = parseLocalizedNumber(field('price').value);
-    const quantity = parseLocalizedNumber(field('quantity').value);
-    return {
-        ticker: field('ticker').value.toUpperCase(),
+    return buildTransactionPayload({
+        ticker: field('ticker').value,
         date,
         type: 'BUY',
-        amount,
-        price,
-        quantity,
-        currency: field('currency').value,
-        tag: field('tag').value,
-        weight: parseInt(field('weight').value || '0')
-    };
+        quantity: field('quantity').value,
+        price: field('price').value
+    });
 }
 
 async function submitRelease(event) {
@@ -319,24 +275,19 @@ async function submitRelease(event) {
     clearFeedback();
     const date = document.getElementById('release-date').value;
     const lines = [...document.querySelectorAll('.release-line')].map(line => readReleaseLine(line, date));
-    const validLines = lines.filter(line => line.ticker && line.amount > 0 && line.price >= 0);
+    const validLines = lines.filter(line => line.ticker && line.quantity > 0 && line.price >= 0);
 
     if (!date || validLines.length === 0) {
-        showFeedback('Add at least one investment line with date, ticker, amount, and price.');
+        showFeedback('Add at least one investment line with date, ticker, quantity, and unit price.');
         return;
     }
 
     showLoader();
     try {
         for (const line of validLines) {
-            const response = await fetch('/api/wallet/transaction', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(line)
-            });
-            const payload = await response.json();
-            if (!response.ok) {
-                showFeedback(payload.error || `Could not save ${line.ticker}.`);
+            const saved = await postTransaction(line);
+            if (!saved.ok) {
+                showFeedback(saved.error || `Could not save ${line.ticker}.`);
                 return;
             }
         }
@@ -344,11 +295,31 @@ async function submitRelease(event) {
         document.getElementById('release-date').value = new Date().toISOString().split('T')[0];
         document.getElementById('release-lines').innerHTML = '';
         addReleaseLine();
-        showFeedback('Monthly contribution saved.', 'success');
         await fetchWallet();
+        showFeedback('Monthly contribution saved.', 'success');
     } finally {
         hideLoader();
     }
+}
+
+function buildTransactionPayload({ ticker, date, type, quantity, price }) {
+    return {
+        ticker: String(ticker || '').trim().toUpperCase(),
+        date,
+        type,
+        quantity: parseLocalizedNumber(quantity),
+        price: parseLocalizedNumber(price)
+    };
+}
+
+async function postTransaction(data) {
+    const response = await fetch('/api/wallet/transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const payload = await response.json();
+    return response.ok ? { ok: true, payload } : { ok: false, error: payload.error };
 }
 
 function switchTab(tabId) {
@@ -465,7 +436,33 @@ function renderEvolutionChart(transactions) {
         accumulated += item.net_brl_equivalent || 0;
         return accumulated;
     });
+    const contributionDatasets = [
+        {
+            label: 'BRL contributions',
+            data: brlBuys,
+            backgroundColor: '#10b981',
+            borderRadius: 4,
+            categoryPercentage: 0.72,
+            barPercentage: 0.86
+        },
+        {
+            label: 'USD contributions in BRL',
+            data: usdBuysInBrl,
+            backgroundColor: '#3b82f6',
+            borderRadius: 4,
+            categoryPercentage: 0.72,
+            barPercentage: 0.86
+        }
+    ];
     window.__lastEvolutionChartData = { labels, brlBuys, usdBuysInBrl, accumulatedData };
+    window.__lastEvolutionChartConfig = {
+        xStacked: false,
+        yStacked: false,
+        datasets: contributionDatasets.map(dataset => ({
+            label: dataset.label,
+            stack: dataset.stack || null
+        }))
+    };
 
     if (typeof Chart === 'undefined') return;
     const ctx = document.getElementById('evolutionChart').getContext('2d');
@@ -482,20 +479,7 @@ function renderEvolutionChart(transactions) {
                 return `${parts[1]}/${parts[0]}`;
             }),
             datasets: [
-                {
-                    label: 'BRL contributions',
-                    data: brlBuys,
-                    backgroundColor: '#10b981',
-                    borderRadius: 4,
-                    stack: 'contributions'
-                },
-                {
-                    label: 'USD contributions in BRL',
-                    data: usdBuysInBrl,
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 4,
-                    stack: 'contributions'
-                },
+                ...contributionDatasets,
                 {
                     label: 'Accumulated net invested',
                     type: 'line',
@@ -527,7 +511,7 @@ function renderEvolutionChart(transactions) {
                     grid: { color: '#334155' }
                 },
                 x: {
-                    stacked: true,
+                    stacked: false,
                     ticks: { color: '#94a3b8' },
                     grid: { display: false }
                 }

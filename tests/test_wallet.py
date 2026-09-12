@@ -144,6 +144,36 @@ def test_amount_transaction_creates_usd_asset_and_summary(mock_fx, mock_wallet_f
     assert summary['gross_invested_brl_equivalent'] == 1250
     assert summary['monthly'][0]['month'] == '2026-05'
 
+def test_add_transaction_reuses_existing_asset_metadata_with_minimal_payload(mock_wallet_file):
+    wallet.save_wallet({
+        "assets": [
+            {"ticker": "VOO", "weight": 40, "tag": "US ETFs", "quantity": 1, "average_price": 100}
+        ],
+        "groups": {},
+        "transactions": [
+            {"id": "1", "ticker": "VOO", "date": "2026-01-01", "type": "BUY", "quantity": 1, "price": 100, "amount": 100, "currency": "USD"}
+        ]
+    })
+
+    tx = wallet.add_transaction({
+        "ticker": "voo",
+        "date": "2026-02-01",
+        "type": "BUY",
+        "quantity": 2,
+        "price": 110
+    })
+
+    loaded = wallet.load_wallet()
+    asset = loaded["assets"][0]
+
+    assert tx["ticker"] == "VOO"
+    assert tx["currency"] == "USD"
+    assert tx["amount"] == 220
+    assert asset["tag"] == "US ETFs"
+    assert asset["weight"] == 40
+    assert asset["quantity"] == 3
+    assert asset["average_price"] == pytest.approx(106.66666667)
+
 def test_sell_edge_cases_and_investment_summary(mock_wallet_file):
     wallet.save_wallet({
         "assets": [
